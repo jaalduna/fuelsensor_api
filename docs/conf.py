@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.abspath('../src/'))
 
 # -- Project information -----------------------------------------------------
 
-project = u'aiko1'
+project = u'Fuelsensor api'
 copyright = u'2018, Joaquin Aldunate V'
 author = u'Joaquin Aldunate V'
 

@@ -6,9 +6,10 @@
 Welcome to aiko1's documentation!
 =================================
 
-Write introduction here.
+Welcome to fuelsensor API documentation.
 
-Requirements for project:
+
+for project:
 
 This project depends on crcmod and matplotlib package.
 
