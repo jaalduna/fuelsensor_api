@@ -36,7 +36,7 @@ Api Bootloader
 
 El dispositivo FuelSensor trae desde fabrica un firmware que permite actualizar la aplicación que se ejecutará en operación normal. La interfaz de esta firmware corresponde a la api de Bootloader.
 
-En la carpeta ``api`` ejecutarmos un terminal de python  y crearemos una instancia de la clase api Bootloader:
+En la carpeta ``src`` ejecutarmos un terminal de python  y crearemos una instancia de la clase api Bootloader:
 
 ..	code-block:: python
 
@@ -51,7 +51,7 @@ Con la instancia creada podemos corroborar que todo este ok preguntando por la v
 
 La api intentará conectarse con el dispositivo y encuestará la versión del bootloader. Si todo marcha bien, debería aparecer en pantalla como respuesta la versión actual del Firmware de bootloader.
 
-Ahora cargaremos una nueva app al dispositivo. Para eso almacenaremos la aplicación compilada en la carpeta ``api``. Cargaremos la aplicación mediante la siguiente serie de comandos
+Ahora cargaremos una nueva app al dispositivo. Para eso almacenaremos la aplicación compilada en la carpeta ``src``. Cargaremos la aplicación mediante la siguiente serie de comandos
 
 ..	code-block:: python
 
