@@ -2,7 +2,7 @@ import struct
 import crcmod
 import socket
 import time
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
 
 #constants declaration
