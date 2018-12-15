@@ -3,13 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to aiko1's documentation!
+Welcome to Fulsensor API documentation!
 =================================
 
 Welcome to fuelsensor API documentation.
 
 
-for project:
+Dependencies for project:
 
 This project depends on crcmod and matplotlib package.
 
