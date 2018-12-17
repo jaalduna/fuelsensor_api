@@ -16,7 +16,7 @@ El dispositivo FuelSensor, actualmente en su versión 1.8, permite medir la altu
 El firmware en el dispositivo FuelSensor se controla mediante dos api: bootloader y Fuelsensor_interface.
 La interfaz Bootloader permite adminsitrar la aplicación que se ejecutará en operación normal del dispositvo. Mientras que la api FuelSensor_interface corresponde a la interfaz de la aplicación y permite obtener controlar los distintos sensores y actuadores del dispositivo, así como también obtener variables de interes tales como altura del estanque, series de tiempo, entre otras. 
 
-Las interfaces están escritas en `Python 2.7 <https://www.python.org/download/releases/2.7/>`_ , luego para poder utilizarlas, es necesario tenerlo instalado tu computador.
+Las interfaces están escritas en `Python 2.7 <https://www.python.org/downloads/release/python-2713/>`_ , luego para poder utilizarlas, es necesario tenerlo instalado tu computador.
 
 Además deberas instalar los paquetes de dependencia crcmod y matplotlib mediante pip:
 
