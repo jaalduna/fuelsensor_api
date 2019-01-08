@@ -52,7 +52,7 @@ class Fuelsensor_interface(object):
                         break
                 else:
                     # print len(data)
-                    # self.print_modbus(data)
+                    #self.print_modbus(data)
                     pass
             else:
                 self.socket.send(packet)
@@ -191,7 +191,7 @@ class Fuelsensor_interface(object):
                         return data
                 
             except:
-                
+                self.print_modbus(data)
                 print "no answer...",
                 
                 if(True):
@@ -210,6 +210,9 @@ class Fuelsensor_interface(object):
 
     def print_modbus(self,res):
         print(":".join("{:02x}".format(ord(c)) for c in res))
+    def backup_timeseries(self):
+        params = bytearray()
+        self.send_cmd(BK_TIMESERIES,params,8)
 
 
 # fs_interface = Fuelsensor_interface()

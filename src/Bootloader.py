@@ -22,8 +22,8 @@ crc16 = crcmod.predefined.mkPredefinedCrcFun("xmodem")
 
 class Bootloader(object):
     """Bootloader class"""
-    def __init__(self):
-        super(Bootloader, self).__init__(tcp_ip='192.168.0.10', tcp_port=5000, timeout=2)
+    def __init__(self,tcp_ip='192.168.0.10', tcp_port=5000, timeout=2):
+        super(Bootloader, self).__init__()
         """ Constructor. No parameters are expected"""
         self.TCP_IP = tcp_ip
         self.TCP_PORT = tcp_port 
