@@ -25,7 +25,7 @@ class Fuelsensor_interface(object):
         self.TCP_PORT = 5000
         self.BUFFER_SIZE  = 2048
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.timeout =1
+        self.timeout =0.1
         self.socket.settimeout(self.timeout)
 
     def __del__(self):
