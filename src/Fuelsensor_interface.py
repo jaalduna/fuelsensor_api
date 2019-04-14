@@ -40,7 +40,12 @@ class Fuelsensor_interface(object):
         #crc, not implemented yet
         packet.append(0)
         packet.append(0)
-        print len(packet)
+
+        #added to complete 8 bytes on the rx fifo of fuelsensor device
+        packet.append(0)
+        packet.append(0)
+        packet.append(0)
+        packet.append(0)
         
         while(True):
             if(rx_len > 0):
