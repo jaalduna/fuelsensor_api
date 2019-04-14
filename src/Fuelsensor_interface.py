@@ -40,7 +40,8 @@ class Fuelsensor_interface(object):
         #crc, not implemented yet
         packet.append(0)
         packet.append(0)
-
+        print len(packet)
+        
         while(True):
             if(rx_len > 0):
                 data = self.receive_retry(packet, rx_len + 2, verbose=False, connect=False)
