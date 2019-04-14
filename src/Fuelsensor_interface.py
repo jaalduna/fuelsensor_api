@@ -33,15 +33,20 @@ class Fuelsensor_interface(object):
 
     def send_cmd(self, cmd, params,rx_len):
         packet = bytearray()
-        packet += struct.pack(">H", cmd)
+        packet += struct.pack(">H", cmd) # 2 bytes
 
-        packet += params # append params bytearray
+        if len(params) == 0:
+            for i in range(4):
+                packet.append(0)
+        else
+            packet += params
 
         #crc, not implemented yet
         packet.append(0)
         packet.append(0)
-        print len(packet)
-        
+
+
+
         while(True):
             if(rx_len > 0):
                 data = self.receive_retry(packet, rx_len + 2, verbose=False, connect=False)
@@ -104,7 +109,7 @@ class Fuelsensor_interface(object):
         return data  
 
     def get_height(self):
-        """ get hight of liquid in meters."""
+        """ get hight of liquid in meters."""     
         data = self.send_cmd(GET_HEIGHT, bytearray(), 4)
         self.print_modbus(data)
         height = struct.unpack('<f', data)[0]
@@ -118,13 +123,7 @@ class Fuelsensor_interface(object):
         print "pos: " + str(pos) + " [samples]"    
     def reset(self):
         """ reset fuelsensor and enter into Bootloader mode"""
-        params = bytearray()
-        params.append(0)
-        params.append(0)
-        params.append(0)
-        params.append(0)
-
-        self.send_cmd(RESET, params, 0)
+        self.send_cmd(RESET, bytearray(), 0)
 
     def check_crc(self, msg):
         calculated_crc = bytearray()

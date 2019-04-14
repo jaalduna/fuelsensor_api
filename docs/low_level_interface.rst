@@ -7,4 +7,10 @@ La comunicación entre la api y el dispositivo fuelsensor ocurre mediante interc
 Paquete Query
 -------------
 
-El formato del `paquete query` es 
+El formato del `paquete query` es:
+
+`cmd (2 bytes), params(4 bytes), CRC(2 bytes)`
+
+
+
+
