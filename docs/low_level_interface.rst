@@ -1,4 +1,4 @@
-Interfaz de bajo nivel
+Estructura de paquetes
 ===================
 
 La comunicación entre la api y el dispositivo fuelsensor ocurre mediante intercambio de paquetes de bytes. La api genera solicitudes para el dispositivo fuelSensor mediante un `paquete query`. El dispositivo fuelsensor procesa el paquete y responde con el `paquete response`. 
@@ -9,15 +9,38 @@ Paquete Query
 
 El formato del `paquete query` es:
 
-`cmd (2 bytes), params(4 bytes), CRC(2 bytes)`
 
-`cmd` representa una instrucción de comando a ejecutar para el dispositivo fuelsensor
++---------+---------+---------+
+| cmd     | params  | crc     |
++=========+=========+=========+
+| 2 bytes | 8 bytes | 2 bytes |
++---------+---------+---------+
+
+* `cmd` representa una instrucción de comando a ejecutar para el dispositivo fuelsensor
+* `params` es una lista de parámetros que depende del tipo de query que se esta realizando
+* `crc` es un chequeo de redundancia ciclica de 16 bits en formato `xmodem`
+  
+Paquete response
+----------------
+El formato del `paquete response` es:
+
++---------+-----------+-----------+---------+
+| cmd     | num_bytes | payload   | crc     |
++=========+===========+===========+=========+
+| 2 bytes | 2 bytes   | num_bytes | 2 bytes |
++---------+-----------+-----------+---------+
+
+* `cmd`  es el comando al que está respondiendo
+* `num_bytes` es el número de bytes en el campo payload
+* `payload` son los bytes de respuesta
+* `crc` es un chequeo de redundancia ciclica de 16 bits en formato `xmodem`
+
 
 Lista de commandos (cmd)
 ^^^^^^^^^^^^^^^^^^^
 
 +--------+---------------------------------+----------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
-| cmd id | cmd name                        | params                           | DESCRIPCIÓN                                                                                                                                          |
+| cmd_id | cmd name                        | params                           | DESCRIPCIÓN                                                                                                                                          |
 +========+=================================+==================================+======================================================================================================================================================+
 | 1      | BK_TIMESERIES                   | ---                              | se guarda un spanshot de la series de tiempo obtenedias en la última medición                                                                        |
 +--------+---------------------------------+----------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -39,6 +62,206 @@ Lista de commandos (cmd)
 +--------+---------------------------------+----------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
 | 10     | BACKUP_PARAMS_TO_FLASH          | ---                              | guarda los parámetros actuales en la memoria flash. Utiliza esta función una vez se esté conforme con los parámetros escogidos.                      |
 +--------+---------------------------------+----------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+La información en el campo de parámetros se ajusta a la izquierda. Por ejemplo, para los comandos GET_NORM_ECHO y GET_SDFT_ECHO se utilizan únicamente los primeros 4 bytes del campo de parámetros.
+
+Comando BK_TIMESERIES
+"""""""""""""""""""""
+Gatilla un respaldo de la series de tiempo obtenedias por el dispositivo en su última medición.
+
++--------+------------+-----+
+| cmd_id | params     | crc |
++========+============+=====+
+| 0x0001 | 0x00000000 | crc |
++--------+------------+-----+
+
+Una vez que el dispositivo ha realizado el respaldo de las series de tiempo, retorna un mensaje de respuesta `ack`:
+
++--------+-----------+---------+---------+
+| cmd    | num_bytes | payload | crc     |
++========+===========+=========+=========+
+| 0x0001 | 0x0000    | ---     | 2 bytes |
++--------+-----------+---------+---------+
+
+
+Comando GET_NORM_ECHO
+""""""""
+Solicita la serie de tiempo del eco normalizado. Recibe como parámetros un `offset` en número de muestras respecto del inicio de la secuencia y largo `length` para indicar cuantas muestras está solicitando.
+El parámetro `length` típicamente no puede ser muy largo (<1000 muestras) debido a limitaciones en la interfaz de comunicaciones 485, interfaz asincrona. Entonces, para obtener una serie de tiempo completa es necesario
+solicitarla por tramos.
+
+
++--------+----------------------+-----+
+| cmd_id | params               | crc |
++========+======================+=====+
+| 0x0002 | offset length 0x0000 | crc |
++--------+----------------------+-----+
+
+ La respuesta de retorno sigue el siguiente formato:
+
++--------+-----------+---------+-----+
+| cmd    | num_bytes | payload | crc |
++========+===========+=========+=====+
+| 0x0002 | length    | payload | crc |
++--------+-----------+---------+-----+
+
+Comando GET_SDFT_ECHO
+"""""""""""""""""""""
+Comando identico al comando GET_NORM_ECHO, tan solo que rescata la serie de tiempo de la SDFT. La solicitud es:
+
++--------+----------------------+-----+
+| cmd_id | params               | crc |
++========+======================+=====+
+| 0x0003 | offset length 0x0000 | crc |
++--------+----------------------+-----+
+
+La respuesta es:
+
++--------+-----------+---------+-----+
+| cmd    | num_bytes | payload | crc |
++========+===========+=========+=====+
+| 0x0003 | length    | payload | crc |
++--------+-----------+---------+-----+
+
+
+Comando RESET
+""""""""""""""
+Resetea al dispositivo. Este comando se utiliza para reinicar al equipo, típicamente para entrar a modo bootloader y reprogramar el firmware.
+
+Formato de solicitud:
+
++--------+------------+-----+
+| cmd_id | params     | crc |
++========+============+=====+
+| 0x0004 | 0x00000000 | crc |
++--------+------------+-----+
+
+Debido a que el dispositivo se resetea una vez recibido el comando, no hay respuesta a este comando.
+
+Comando GET_HEIGHT
+""""""""
+Solicita el valor estimado de la altura actual del estanque. 
+
+Formato de solicitud:
+
++--------+------------+-----+
+| cmd_id | params     | crc |
++========+============+=====+
+| 0x0005 | 0x00000000 | crc |
++--------+------------+-----+
+
+
+Formato de respuesta:
+
++--------+-----------+---------+-----+
+| cmd    | num_bytes | payload | crc |
++========+===========+=========+=====+
+| 0x0005 | 0x0004    | heigth  | crc |
++--------+-----------+---------+-----+
+
+Comando GET_POS
+"""""""""""""""
+retorna el valor de posición, en número de muestras, del eco.
+
+formato de solicitud:
+
++--------+------------+-----+
+| cmd_id | params     | crc |
++========+============+=====+
+| 0x0006 | 0x00000000 | crc |
++--------+------------+-----+
+
+formato de respuesta:
+
++--------+-----------+---------+-----+
+| cmd    | num_bytes | payload | crc |
++========+===========+=========+=====+
+| 0x0006 | 0x0004    | pos     | crc |
++--------+-----------+---------+-----+
+
+Comando GET_PARAM
+"""""""""""""""""
+Solicita el valor de un parámetro. Existen 3 tipos de parámetros: bytes, unsigned short y float32. El formato de respuesta es siempre el mismo, la tarea de decodificar los strings de bytes se realiza en el lado del equipo host.
+
+formato de solicitud:
+
++--------+--------------------+-----+
+| cmd_id | params             | crc |
++========+====================+=====+
+| 0x0007 | PARAM_ID 0x0000000 | crc |
++--------+--------------------+-----+
+
+PARAM_ID es un byte que indica el parámetro se quiere solicitar. Una lista detallada de parámetros se encuentra en `Lista de parámetros`_.
+
+formato de respuesta:
+
+Independiente del tipo de parámetro solicitado, la respusta siempre consiste en 4 bytes en el campo de payload. En el caso de solicitarse un parámetro de tipo byte, se utiliza el byte de más a la izquierda. En el caso de solicitarse parámetro de tipo unsigned short, se utilizan los dos primeros bytes de izquierda a derecha. Y si se solicita un parámetro de tipo float32, se utilizan todos los bytes.
+
++--------+-----------+---------+-----+
+| cmd    | num_bytes | payload | crc |
++========+===========+=========+=====+
+| 0x0007 | 0x0004    | pos     | crc |
++--------+-----------+---------+-----+
+
+Comando SET_PARAM
+"""""""""""""""""
+Actualiza el valor de un parámetro. La respuesta retorna el valor del parámetro actualizado.
+
+Formato de solicitud:
+
++--------+----------------------+-----+
+| cmd_id | params               | crc |
++========+======================+=====+
+| 0x0008 | PARAM_ID 0x000 value | crc |
++--------+----------------------+-----+
+
+formato de respuesta:
+
++--------+-----------+---------+-----+
+| cmd    | num_bytes | payload | crc |
++========+===========+=========+=====+
+| 0x0008 | 0x0004    | value   | crc |
++--------+-----------+---------+-----+
+
+Comando RESTORE_DEFAULT_PARAMS_TO_FLASH
+"""""""""""""""""""""""""""""""""""""""
+Solicita restaurar los valores por defecto de los parámetros. Este comando se llama típicamente al inicio de una instalación, con el fin de partir desde un punto de configuración conocido.
+
+formato de solicitud:
+
++--------+------------+-----+
+| cmd_id | params     | crc |
++========+============+=====+
+| 0x0009 | 0x00000000 | crc |
++--------+------------+-----+
+
+formato de respuesta:
+
++--------+-----------+---------+---------+
+| cmd    | num_bytes | payload | crc     |
++========+===========+=========+=========+
+| 0x0009 | 0x0000    | ---     | 2 bytes |
++--------+-----------+---------+---------+
+
+Comando BACKUP_PARAMS_TO_FLASH
+""""""""""""""""""""""""""""""
+Solicita respaldar los actuales parámetros en memoria no volatil. Esta función se llama cada vez que se actualicen los parámetros y se considere que los cambios realizados deben mantenerse. Cada vez que el dispositivo se reinicia, carga los parámetros desde la memoria no volatil.
+
+formato de solicitud:
+
++--------+------------+-----+
+| cmd_id | params     | crc |
++========+============+=====+
+| 0x000a | 0x00000000 | crc |
++--------+------------+-----+
+
+formato de respuesta:
+
++--------+-----------+---------+---------+
+| cmd    | num_bytes | payload | crc     |
++========+===========+=========+=========+
+| 0x000a | 0x0000    | ---     | 2 bytes |
++--------+-----------+---------+---------+
 
 
 Lista de parámetros
