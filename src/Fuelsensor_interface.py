@@ -14,11 +14,131 @@ GET_SDFT_ECHO = 3
 RESET = 4
 GET_HEIGHT = 5
 GET_POS = 6
+GET_PARAM = 7
+SET_PARAM = 8
+RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
+BACKUP_PARAMS_TO_FLASH = 10
+
+
+#TODO: create a list of PARAMS constants using fields "PARAM_ID" and "nombre" from
+# the table "lista de parametros" located at
+#https://fuelsensor.readthedocs.io/en/latest/low_level_interface.html
+PARAM_DATA_VECTOR_TYPE = 0x00
+PARAM_DATA_VECTOR_OFFSET = 0x02
+PARAM_PGA_GAIN = 0x04
+PARAM_NUM_PULSES = 0x05
+PARAM_PULSE_PERIOD = 0x06
+PARAM_PULSE_WIDTH = 0x07
+PARAM_RES_HV = 0x08
+PARAM_SDFT_MIN_PEAK_VALUE_TH = 0x09
+PARAM_SDFT_K = 0x0D
+PARAM_SDFT_N = 0x0F
+PARAM_SDFT_I_MIN = 0x11
+PARAM_SDFT_MIN_ECO_LIMIT = 0x13
+PARAM_SDFT_MAX_ECO_LIMIT = 0x14
+PARAM_SDFT_VAR_NORM = 0x15
+PARAM_SDFT_PEAK = 0x19
+PARAM_SDFT_SOUND_SPEED = 0x1D
+PARAM_SDFT_SAMPLE_RATE = 0x1F
+PARAM_SDFT_N_SAMPLES_ONE_VALID = 0x21
+PARAM_SKIP_PARAM = 0x23
+
 
 crc16 = crcmod.predefined.mkPredefinedCrcFun("xmodem")
 
+class Param(object):
+    def __init__(self,interface, param_id, num_bytes):
+        super(Param, self).__init__()
+        self.param_id = param_id 
+        self.num_bytes = num_bytes
+        self.value = 0
+        self.interface = interface
+    def get_value(self):
+        if(self.num_bytes == 1):
+            self.value = self.interface.get_param_byte(self.param_id)
+        elif self.num_bytes == 2:
+            self.value = self.interface.get_param_unsigned_short(self.param_id)
+        elif self.num_bytes ==4:
+            self.value = self.interface.get_param_float_32(self.param_id)
+            
+    def set_value(self,value):
+        if(self.num_bytes ==1):
+            self.interface.set_param_byte(self.param_id, 8, value)
+            self.value = self.interface.get_param_byte(self.param_id)
+        elif (self.num_bytes == 2):
+            self.interface.set_param_unsigned_short(self.param_id, 8, value)
+            self.value = self.interface.get_param_unsigned_short(self.param_id)
+        elif (self.num_bytes == 4):
+            self.interface.set_param_float_32(self.param_id, 8, value)
+            self.value = self.interface.get_param_float_32(self.param_id)
+
+
+
+class Params(object):
+    PARAM_DATA_VECTOR_TYPE = 0x00
+    PARAM_DATA_VECTOR_OFFSET = 0x04
+    PARAM_PGA_GAIN = 0x08
+    PARAM_NUM_PULSES = 0x09
+    PARAM_PULSE_PERIOD = 0x0a
+    PARAM_PULSE_WIDTH = 0x0b
+    PARAM_RES_HV = 0x0c
+    PARAM_SDFT_MIN_PEAK_VALUE_TH = 0x0d
+    PARAM_SDFT_K = 0x11
+    PARAM_SDFT_N = 0x13
+    PARAM_SDFT_I_MIN = 0x15
+    PARAM_SDFT_MIN_ECO_LIMIT = 0x17
+    PARAM_SDFT_MAX_ECO_LIMIT = 0x18
+    PARAM_SDFT_VAR_NORM = 0x19
+    PARAM_SDFT_PEAK = 0x1d
+    PARAM_SDFT_SOUND_SPEED = 0x21
+    PARAM_SDFT_SAMPLE_RATE = 0x23
+    PARAM_SDFT_N_SAMPLES_ONE_VALID = 0x25
+    PARAM_SKIP_PARAM = 0x27
+
+    def __init__(self, interface):
+        super(Params, self).__init__()
+        self.data_vector_type = Param(interface,PARAM_DATA_VECTOR_TYPE,2)
+        self.data_vector_offset = Param(interface,PARAM_DATA_VECTOR_OFFSET,2)
+        self.pga_gain = Param(interface, PARAM_PGA_GAIN,1)
+        self.num_pulses = Param(interface, PARAM_NUM_PULSES,1)
+        self.pulse_period = Param(interface, PARAM_PULSE_PERIOD,1)
+        self.pulse_width = Param(interface, PARAM_PULSE_WIDTH,1)
+        self.res_hv = Param(interface, PARAM_RES_HV,1)
+        self.sdft_min_peak_value_th = Param(interface, PARAM_SDFT_MIN_PEAK_VALUE_TH,4)
+        self.sdft_k = Param(interface, PARAM_SDFT_K,2)
+        self.sdft_n = Param(interface, PARAM_SDFT_N,2)
+        self.sdft_i_min = Param(interface,PARAM_SDFT_I_MIN,2)
+        self.sdft_min_eco_limit = Param(interface, PARAM_SDFT_MIN_ECO_LIMIT,1)
+        self.sdft_max_eco_limit = Param(interface, PARAM_SDFT_MAX_ECO_LIMIT,1)
+        self.sdft_var_norm = Param(interface, PARAM_SDFT_VAR_NORM,4)
+        self.sdft_peak = Param(interface, PARAM_SDFT_PEAK,4)
+        self.sdft_sound_speed = Param(interface, PARAM_SDFT_SOUND_SPEED,2)
+        self.sdft_sample_rate = Param(interface, PARAM_SDFT_SAMPLE_RATE,2)
+        self.sdft_n_samples_one_valid = Param(interface, PARAM_SDFT_N_SAMPLES_ONE_VALID,2)
+        self.skip_param = Param(interface, PARAM_SKIP_PARAM,2)
+
+class Node(object):
+    def __init__(self):
+        super(Node,self).__init__()
+        self.fs_interface = Fuelsensor_interface()
+        self.params = Params(self.fs_interface)
+
+
 class Fuelsensor_interface(object):
     """Fuelsensor_interface class """
+
+    #command constants
+    BK_TIMESERIES = 1
+    GET_NORM_ECHO = 2
+    GET_SDFT_ECHO = 3
+    RESET = 4
+    GET_HEIGHT = 5
+    GET_POS = 6
+    GET_PARAM = 7
+    SET_PARAM = 8
+    RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
+    BACKUP_PARAMS_TO_FLASH = 10
+
     def __init__(self):
         super(Fuelsensor_interface, self).__init__()
         self.TCP_IP = '192.168.0.10'
@@ -28,6 +148,7 @@ class Fuelsensor_interface(object):
         self.timeout =0.1
         self.socket.settimeout(self.timeout)
 
+
     def __del__(self):
         self.socket.close()
 
@@ -35,31 +156,34 @@ class Fuelsensor_interface(object):
         packet = bytearray()
         packet += struct.pack(">H", cmd) # 2 bytes
 
-        if len(params) == 0:
-            for i in range(4):
-                packet.append(0)
-        else:
-            packet += params
+        #fill with zeros so 4 bytes filled on the params field. 
+        #for i in range(4 - len(params)):
+        #        packet.append(0)
+
+        #fill with params values #4 bytes
+        for i in range(len(params)):
+            packet.append(params[i])
 
         #crc, not implemented yet
         packet.append(0)
         packet.append(0)
 
-
-
         while(True):
             if(rx_len > 0):
                 data = self.receive_retry(packet, rx_len + 2, verbose=False, connect=False)
                 if(len(data) >= rx_len + 2):
-                    data = data[0:rx_len + 2]
+                    data = data[0:rx_len + 2] #chunk garbage bytes
                     crc = str(data[len(data) - 2:])
                     calculated_crc = struct.pack('>H', crc16(str(data[0:len(data)- 2])))
                     if crc == calculated_crc:
                         break
+                    else:
+                        raise Exception("bad crc")
                 else:
                     # print len(data)
                     #self.print_modbus(data)
-                    pass
+                    raise Exception("not enougth rx bytes")
+                    break
             else:
                 self.socket.send(packet)
                 return
@@ -109,21 +233,27 @@ class Fuelsensor_interface(object):
         return data  
 
     def get_height(self):
-        """ get hight of liquid in meters."""     
-        data = self.send_cmd(GET_HEIGHT, bytearray(), 4)
-        self.print_modbus(data)
+        """ get hight of liquid in meters."""    
+        data = self.send_cmd_without_params(GET_HEIGHT, 4)
+        #self.print_modbus(data)
         height = struct.unpack('<f', data)[0]
         print "height: " + str(height) + " [m]"
 
     def get_pos(self):
         """ get variable pos, an int value proportional to hight"""
-        data = self.send_cmd(GET_POS, bytearray(), 4)
+        data = self.send_cmd_without_params(GET_POS, 4)
         self.print_modbus(data)
         pos = struct.unpack('<f', data)[0]
         print "pos: " + str(pos) + " [samples]"    
     def reset(self):
         """ reset fuelsensor and enter into Bootloader mode"""
-        self.send_cmd(RESET, bytearray(), 0)
+        self.send_cmd_without_params(RESET, 0)
+
+    def send_cmd_without_params(self, name, num_bytes):
+        """ send command name, filling params with 4 zeros"""
+        params_field = bytearray()
+        params_field = struct.pack('>BBBBBBBB',0,0,0,0,0,0,0,0) 
+        self.send_cmd(name, params_field,num_bytes)
 
     def check_crc(self, msg):
         calculated_crc = bytearray()
@@ -213,6 +343,60 @@ class Fuelsensor_interface(object):
     def backup_timeseries(self):
         params = bytearray()
         self.send_cmd(BK_TIMESERIES,params,8)
+
+    def get_param(self, param_id, num_bytes_response):
+        #TODO: Implement get_param function. get_param should query, print and return the parameter given by param_id. 
+        # using the command self.send_cmd. Return value should be converted from bytearray to type described at
+        #table "Lista de parametros " located at https://fuelsensor.readthedocs.io/en/latest/low_level_interface.html. Use , using struct.unpack() function for that.
+        #second argument from send_cmd should be 4 bytes. Add them at the end. 
+
+        #lets transform param_id into a 4 bytes bytearra() with the last byte
+        param_field = struct.pack('>BBBBBBBB', 0,0,0,param_id,0,0,0,0)
+        param_value_bytearray = self.send_cmd(GET_PARAM, param_field, num_bytes_response) 
+        #check number of bytes returned, it seems that answer is always 4 bytes ??
+
+
+        #complete for other param_id values, struct.unpack format should be
+        # ''
+        return param_value_bytearray
+
+    def get_param_byte(self,param_id):
+        param_value_bytearray = self.get_param(param_id,1)
+        return param_value_bytearray
+
+    def get_param_unsigned_short(self,param_id):
+        param_value_bytearray = self.get_param(param_id,2)
+        return struct.unpack('>H',param_value_bytearray)[0]
+
+    def get_param_float_32(self, param_id):
+        param_value_bytearray = self.get_param(param_id,4)
+        return struct.unpack('<f', param_value_bytearray)[0]
+
+    def set_param(self, param_id, num_bytes_response, value):
+        param_field = struct.pack('>BBBB',0,0,0,param_id)
+        param_field += value
+        #update param on the remote node
+        response = self.send_cmd(SET_PARAM, param_field, num_bytes_response)
+        #update param on the local representation of the node
+        self.print_modbus(response)
+        return response
+
+    def set_param_byte(self, param_id,value):
+        value_field =  struct.pack('>BBBB',0,0,0,value)
+        response =  self.set_param(param_id, 1, value)
+        return response
+
+    def set_param_unsigned_short(self, param_id,value):
+        value_field =  struct.pack('>HH',0,value)
+        response = self.set_param(param_id, 1, value)    
+        return response
+    def set_param_float_32(self, param_id,value):
+        value_field =  struct.pack('<f',value)
+        response = self.set_param(param_id, 1, value)  
+        return response
+
+
+
 
 
 # fs_interface = Fuelsensor_interface()
