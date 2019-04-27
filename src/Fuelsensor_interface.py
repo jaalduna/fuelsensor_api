@@ -234,7 +234,7 @@ class Fuelsensor_interface(object):
 
     def get_height(self):
         """ get hight of liquid in meters."""    
-        data = self.send_cmd_without_params(GET_HEIGHT, 4)
+        data = self.send_cmd_without_params(GET_HEIGHT, 10)
         #self.print_modbus(data)
         height = struct.unpack('<f', data)[0]
         print "height: " + str(height) + " [m]"
