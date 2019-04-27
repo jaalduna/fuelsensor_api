@@ -38,7 +38,7 @@ class Fuelsensor_interface(object):
         if len(params) == 0:
             for i in range(4):
                 packet.append(0)
-        else
+        else:
             packet += params
 
         #crc, not implemented yet
