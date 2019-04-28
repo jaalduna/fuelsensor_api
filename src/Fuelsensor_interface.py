@@ -167,6 +167,9 @@ class Fuelsensor_interface(object):
         #crc, not implemented yet
         packet.append(0)
         packet.append(0)
+        #packet = bytearray()
+        #for i in range(12):
+        #    packet.append(i)
 
         while(True):
             if(rx_len > 0):
@@ -174,7 +177,7 @@ class Fuelsensor_interface(object):
                 if(len(data) >= rx_len + 2):
                     data = data[0:rx_len + 2] #chunk garbage bytes
                     crc = str(data[len(data) - 2:])
-                    calculated_crc = struct.pack('>H', crc16(str(data[0:len(data)- 2])))
+                    calculated_crc = struct.pack('>H', crc16(str(data[4:len(data)- 2])))
                     if crc == calculated_crc:
                         break
                     else:
@@ -187,7 +190,7 @@ class Fuelsensor_interface(object):
             else:
                 self.socket.send(packet)
                 return
-        return data[0:len(data) - 2]
+        return data
 
     def get_norm_echo(self,offset, length):
         """ Return normalized echo"""
@@ -234,9 +237,9 @@ class Fuelsensor_interface(object):
 
     def get_height(self):
         """ get hight of liquid in meters."""    
-        data = self.send_cmd_without_params(GET_HEIGHT, 10)
-        #self.print_modbus(data)
-        height = struct.unpack('<f', data)[0]
+        data = self.send_cmd_without_params(GET_HEIGHT, 8)
+
+        height = struct.unpack('<f', data[4:8])[0]
         print "height: " + str(height) + " [m]"
 
     def get_pos(self):
@@ -253,7 +256,8 @@ class Fuelsensor_interface(object):
         """ send command name, filling params with 4 zeros"""
         params_field = bytearray()
         params_field = struct.pack('>BBBBBBBB',0,0,0,0,0,0,0,0) 
-        self.send_cmd(name, params_field,num_bytes)
+        return self.send_cmd(name, params_field,num_bytes)
+        
 
     def check_crc(self, msg):
         calculated_crc = bytearray()
@@ -292,20 +296,27 @@ class Fuelsensor_interface(object):
             try:
                 if(verbose):
                     print "sending: ",
-                    self.print_modbus(str(packet))
+                    #self.print_modbus(str(packet))
                 start_time = (time.time()*1000)
                 #self.print_modbus(str(packet))
 
-                self.socket.send(packet)
+                #self.socket.send(packet)
+                packet_size = 4 
+                for i in range(len(packet)/packet_size):
+                    self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
+                    time.sleep(0.05)
+                #self.socket.send(bytearray(range(1)))
+                
                 counter = 5 
                 data = ""
+
                 while(counter >0):
                     counter -= 1
                     data += self.socket.recv(self.BUFFER_SIZE)
                     
                     # if(verbose):
                     #     print data
-                        #self.print_modbus(data)
+                    #self.print_modbus(data)
                      
                     if(len(data) >= length):
                         stop_time = (time.time()*1000)
