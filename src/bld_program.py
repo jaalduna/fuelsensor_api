@@ -6,7 +6,7 @@ b = Bootloader()
 b.read_version()
 b.connect()
 if len(sys.argv) == 1:
-    b.program_file('aiko1_marzo.hex')
+    b.program_file('./firmware/aiko1.X.production.hex')
 else:
     b.program_file(str(sys.argv[1]))
 b.close_socket()
