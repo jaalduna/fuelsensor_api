@@ -413,20 +413,30 @@ class Fuelsensor_interface(object):
             time.sleep(0.05)  
 
     def get_reg(self):
-        """ returns last unread log regsiter as a Log object. If there is no registers it returns 0 """
+        """ returns last unread log regsiter as raw_log. If there is no registers it returns 0.
+        A raw_log correspond to a bytearray() object that has to be parsed. Log Class implement this parser """
         #call get_cmd with parameter GET_REG = 11 and length determined by number of bytes inside a log
 
     def get_reg_num(self):
         """ returns number of available log registers that have not being read yet"""
         #GET_REG_NUM = 12
-    def log_parser(self,raw_log):
-        """ read raw_log, parse it, create and return a Log object """
+
 
 class Log(object):
-    """Log class. It describes the sructure of data logs """
-    def __init__(self, arg):
-        super(Log, self,timestamp=0).__init__()
-        self.timestamp = timestamp
+    """Log class. It describes the sructure of data logs.
+
+    Args:
+        raw_log (bytearray) : bytearray with raw_log info.
+     """
+    def __init__(self, raw_log = 0):
+        """ Log constructor. If no raw_log is given, log attributes are filled with default values"""
+        super(Log, self).__init__()
+        #if raw_log = 0, use default values
+        #else parse raw_log and update attributes
+        #attributes:
+        # timestamp, hight
+    def log_parser(self,raw_log):
+        """ read raw_log, parse it, create and return a Log object """        
         
 
 
