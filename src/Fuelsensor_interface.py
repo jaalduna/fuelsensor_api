@@ -412,11 +412,11 @@ class Fuelsensor_interface(object):
             self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
             time.sleep(0.05)  
 
-    def get_datalogger_reg(self):
+    def get_reg(self):
         """ returns last unread log regsiter as a Log object. If there is no registers it returns 0 """
         #call get_cmd with parameter GET_REG = 11 and length determined by number of bytes inside a log
 
-    def get_datalogger_reg_num(self):
+    def get_reg_num(self):
         """ returns number of available log registers that have not being read yet"""
         #GET_REG_NUM = 12
     def log_parser(self,raw_log):
