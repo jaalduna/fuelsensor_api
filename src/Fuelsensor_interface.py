@@ -29,6 +29,7 @@ BACKUP_PARAMS_TO_FLASH = 10
 crc16 = crcmod.predefined.mkPredefinedCrcFun("xmodem")
 
 class Param(object):
+    """ Param Class """
     def __init__(self,interface, param_id, num_bytes):
         super(Param, self).__init__()
         self.param_id = param_id 
@@ -57,7 +58,7 @@ class Param(object):
 
 
 class Params(object):
-
+    """ Params class """
 
     def __init__(self, interface):
         super(Params, self).__init__()
@@ -101,11 +102,11 @@ class Params(object):
         self.skip_param = Param(interface, self.PARAM_SKIP_PARAM,2)
 
 class Node(object):
+    """ Node class """
     def __init__(self):
         super(Node,self).__init__()
         self.fs_interface = Fuelsensor_interface()
         self.params = Params(self.fs_interface)
-
 
 class Fuelsensor_interface(object):
     """Fuelsensor_interface class """
@@ -122,6 +123,11 @@ class Fuelsensor_interface(object):
     RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
     BACKUP_PARAMS_TO_FLASH = 10
 
+    #lets add params for datalogger CMD
+    GET_REG = 11
+    GET_REG_NUM = 12
+
+
     def __init__(self):
         super(Fuelsensor_interface, self).__init__()
         self.TCP_IP = '192.168.0.10'
@@ -136,6 +142,7 @@ class Fuelsensor_interface(object):
         self.socket.close()
 
     def send_cmd(self, cmd, params,rx_len):
+        """ send a cmd to the device """
         packet = bytearray()
         packet += struct.pack(">H", cmd) # 2 bytes
 
@@ -403,7 +410,25 @@ class Fuelsensor_interface(object):
         packet_size = 4 
         for i in range(len(packet)/packet_size):
             self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
-            time.sleep(0.05)    
+            time.sleep(0.05)  
+
+    def get_datalogger_reg(self):
+        """ returns last unread log regsiter as a Log object. If there is no registers it returns 0 """
+        #call get_cmd with parameter GET_REG = 11 and length determined by number of bytes inside a log
+
+    def get_datalogger_reg_num(self):
+        """ returns number of available log registers that have not being read yet"""
+        #GET_REG_NUM = 12
+    def log_parser(self,raw_log):
+        """ read raw_log, parse it, create and return a Log object """
+
+class Log(object):
+    """Log class. It describes the sructure of data logs """
+    def __init__(self, arg):
+        super(Log, self,timestamp=0).__init__()
+        self.timestamp = timestamp
+        
+
 
 
 # fs_interface = Fuelsensor_interface()
