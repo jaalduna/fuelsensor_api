@@ -201,24 +201,27 @@ class Bootloader(object):
                 time.sleep(0.6) 
                 counter = 5 
                 data = ""
-                while(counter >0):
-                    counter -= 1
-                    data += self.socket.recv(self.BUFFER_SIZE)
-                    
-                    # if(verbose):
-                    #     print data
-                        #self.print_modbus(data)
-                     
-                    if(len(data) >= length):
-                        stop_time = (time.time()*1000)
-                        if(connect):
-                            self.close_socket()
-                        if(verbose):
-                            print "time elapsed: ",
-                            print str(stop_time - start_time)
-                            print "data received ok: ",
-                            self.print_modbus(data)
-                        return data
+                if(length > 0):
+                    while(counter >0):
+                        counter -= 1
+                        data += self.socket.recv(self.BUFFER_SIZE)
+                        
+                        # if(verbose):
+                        #     print data
+                            #self.print_modbus(data)
+                         
+                        if(len(data) >= length):
+                            stop_time = (time.time()*1000)
+                            if(connect):
+                                self.close_socket()
+                            if(verbose):
+                                print "time elapsed: ",
+                                print str(stop_time - start_time)
+                                print "data received ok: ",
+                                self.print_modbus(data)
+                            return data
+                else:
+                    return 0
                 
             except:
                 
@@ -333,7 +336,8 @@ class Bootloader(object):
                 print ""
                 print "program transfer complete ;)"
                 break
-
+    def enter_bootloader(self):
+        response = self.socket.send(bytearray(1))
 # b = Bootloader()
 # b.read_version()
 # b.connect()
