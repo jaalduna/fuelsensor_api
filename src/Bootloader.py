@@ -61,7 +61,7 @@ class Bootloader(object):
         response = self.receive_retry(packet,response_len,False, connect)
         response = self.decode(response)
 
-
+        self.print_modbus(str(response))
         if(self.check_crc(response)):
             pass
             #print "crc ok"
@@ -198,6 +198,7 @@ class Bootloader(object):
                 #self.print_modbus(str(packet))
 
                 self.socket.send(packet)
+                time.sleep(0.6) 
                 counter = 5 
                 data = ""
                 if(length > 0):

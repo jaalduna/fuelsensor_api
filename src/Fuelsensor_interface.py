@@ -123,15 +123,10 @@ class Fuelsensor_interface(object):
     RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
     BACKUP_PARAMS_TO_FLASH = 10
 
-    #lets add params for datalogger CMD
-    GET_REG = 11
-    GET_REG_NUM = 12
-
-
-    def __init__(self):
+    def __init__(self,TCP_IP='192.168.0.10',TCP_PORT=5000):
         super(Fuelsensor_interface, self).__init__()
-        self.TCP_IP = '192.168.0.10'
-        self.TCP_PORT = 5000
+        self.TCP_IP = TCP_IP
+        self.TCP_PORT = TCP_PORT 
         self.BUFFER_SIZE  = 2048
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.timeout =1
@@ -153,8 +148,7 @@ class Fuelsensor_interface(object):
         #fill with params values #4 bytes
         for i in range(len(params)):
             packet.append(params[i])
-
-        #crc, not implemented yet
+#crc, not implemented yet
         packet.append(0)
         packet.append(0)
         #packet = bytearray()
