@@ -420,6 +420,12 @@ class Fuelsensor_interface(object):
     def get_reg_num(self):
         """ returns number of available log registers that have not being read yet"""
         #GET_REG_NUM = 12
+    def increment_reg(self,id_reg):
+        """ increment from id_reg register to the next one. 
+        Cada registro debe contar con un ID, para determinar si la función increment_reg()
+
+         """
+
 
 
 class Log(object):
@@ -436,7 +442,7 @@ class Log(object):
         #attributes:
         # timestamp, hight
     def log_parser(self,raw_log):
-        """ read raw_log, parse it, create and return a Log object """        
+        """ read raw_log, parse it, create and update object attributes"""        
         
 
 
