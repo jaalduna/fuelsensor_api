@@ -416,7 +416,7 @@ class Fuelsensor_interface(object):
         #GET_REG_NUM = 12
     def increment_reg(self,id_reg):
         """ increment from id_reg register to the next one. 
-        Cada registro debe contar con un ID, para determinar si la función increment_reg()
+        Cada registro debe contar con un ID, para determinar si la funcion increment_reg()
 
          """
 

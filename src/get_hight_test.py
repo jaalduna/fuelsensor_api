@@ -1,21 +1,12 @@
-# from Fuelsensor_interface import Fuelsensor_interface
-# fs = Fuelsensor_interface()
-# fs.connect()
-# fs.reset()
-# fs.close_socket()
-
-# from Bootloader import Bootloader
-# b = Bootloader()
-# b.read_version()
-# b.connect()
-# b.program_file('aiko1_enero.hex')
-# b.close_socket()
-# b.connect()
-# b.jump_to_app()
-# b.close_socket()
-
+import sys
 from Fuelsensor_interface import Fuelsensor_interface
-fs = Fuelsensor_interface('172.19.6.187',5000)
+
+
+if len(sys.argv) == 3:
+    fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
+else:
+    fs = Fuelsensor_interface()
+    
 print "conectando"
 fs.connect()
 print "solicitando altura"
