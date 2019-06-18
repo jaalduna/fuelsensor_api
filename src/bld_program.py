@@ -2,7 +2,7 @@ from Bootloader import Bootloader
 import sys
 print sys.argv[0]
 print 'number', len(sys.argv)
-b = Bootloader('172.19.6.187',1024)
+b = Bootloader('172.19.6.187',5000)
 b.read_version()
 b.connect()
 if len(sys.argv) == 1:
