@@ -419,7 +419,8 @@ class Fuelsensor_interface(object):
         Cada registro debe contar con un ID, para determinar si la funcion increment_reg()
 
          """
-
+    def send_raw_byte(self,byte):
+        self.socket.send(bytearray(byte))
 
 
 class Log(object):

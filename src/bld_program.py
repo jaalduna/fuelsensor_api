@@ -1,6 +1,6 @@
 from Bootloader import Bootloader
 import sys
-if len(sys.argv) == 3:
+if len(sys.argv) == 4:
     b = Bootloader(str(sys.argv[1]), int(sys.argv[2]))
 else:
     b = Bootloader()
