@@ -182,7 +182,10 @@ class Fuelsensor_interface(object):
         return data
 
     def bk_timeseries(self):
-        """ backup timeseries on node"""
+        """ backup timeseries on node. 
+
+        data returns four bytes {0, cmd = 1, 0,0}
+        """
         data = self.send_cmd_without_params(BK_TIMESERIES, 4)
         return data
     def get_norm_echo(self,offset, length):
@@ -210,12 +213,16 @@ class Fuelsensor_interface(object):
         data = bytearray()
         for i in range (1,truncated_len):
             while(True):
-                partial_data = self.get_norm_echo((i-1)*50,50)
-                time.sleep(0.001)
-                if len(partial_data) == 50: 
+                try:
+                    partial_data = self.get_norm_echo((i-1)*50,50)
+                except:
+                    print "bad crc"
+                    partial_data = bytearray(0)
+                time.sleep(0.002)
+                if len(partial_data) == (50+6): 
                     break;
-            data +=partial_data
-        print len(data)  
+            data +=partial_data[6:]
+            print len(data), "/", length  
         return data  
 
     def get_complete_sdft_echo(self, length):
@@ -346,9 +353,9 @@ class Fuelsensor_interface(object):
 
     def print_modbus(self,res):
         print(":".join("{:02x}".format(ord(c)) for c in res))
-    def backup_timeseries(self):
-        params = bytearray()
-        self.send_cmd(BK_TIMESERIES,params,8)
+    #def backup_timeseries(self):
+    #    params = bytearray()
+    #    self.send_cmd(BK_TIMESERIES,params,8)
 
     def get_param(self, param_id, num_bytes_response):
         #TODO: Implement get_param function. get_param should query, print and return the parameter given by param_id. 
