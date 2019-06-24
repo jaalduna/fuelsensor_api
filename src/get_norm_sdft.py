@@ -7,7 +7,6 @@ import struct
 if len(sys.argv) == 5:
     fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
 else:
-    print "not enought parameters, using default"
     fs = Fuelsensor_interface()
 print "conectando"
 fs.connect()
@@ -19,7 +18,7 @@ offset = 0
 length = int(sys.argv[3])
 packet_size = int(sys.argv[4])
 #data = fs.get_norm_echo(offset, length)
-data = fs.get_complete_norm_echo(length,packet_size)
+data = fs.get_complete_sdft_echo(length,packet_size)
 fs.print_modbus(str(data))
 
 
@@ -32,7 +31,6 @@ fs.close_socket()
 data_norm = []
 for i in range(0,length/4):
     new_data = struct.unpack('<f', data[i*4:(i+1)*4])
-
     # if (new_data[0] > 1 or new_data[0] < -1):
     #     print "new_data:" + str(new_data)
     #     pass
@@ -48,7 +46,3 @@ plt.grid(True)
 plt.title('Echo vs time')
 plt.ylabel('norm echo')
 plt.show()
-
-
-i_min = 250
-

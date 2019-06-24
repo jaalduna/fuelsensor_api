@@ -136,7 +136,7 @@ class Fuelsensor_interface(object):
     def __del__(self):
         self.socket.close()
 
-    def send_cmd(self, cmd, params,rx_len):
+    def send_cmd(self, cmd, params,rx_len,verbose=False):
         """ send a cmd to the device """
         packet = bytearray()
         packet += struct.pack(">H", cmd) # 2 bytes
@@ -154,7 +154,8 @@ class Fuelsensor_interface(object):
         #packet = bytearray()
         #for i in range(12):
         #    packet.append(i)
-        self.print_modbus(str(packet))
+        if(verbose):
+            self.print_modbus(str(packet))
 
         while(True):
             if(rx_len > 0):
@@ -163,8 +164,8 @@ class Fuelsensor_interface(object):
                     data = data[0:rx_len + 2] #chunk garbage bytes
                     crc = str(data[len(data) - 2:])
                     calculated_crc = struct.pack('>H', crc16(str(data[4:len(data)- 2])))
-
-                    self.print_modbus(str(data))
+                    if(verbose):
+                        self.print_modbus(str(data))
                     if crc == calculated_crc:
                         break
                     else:
@@ -207,36 +208,40 @@ class Fuelsensor_interface(object):
         res = self.send_cmd(GET_SDFT_ECHO, params, length+4)
         return res        
 
-    def get_complete_norm_echo(self, length):
+    def get_complete_norm_echo(self, length,packet_size):
         """ get normalized echo timeseries of length 'length'"""
-        truncated_len =  int(length / 50) + 1
+        truncated_len =  int(length / packet_size) + 1
         data = bytearray()
         for i in range (1,truncated_len):
             while(True):
                 try:
-                    partial_data = self.get_norm_echo((i-1)*50,50)
+                    partial_data = self.get_norm_echo((i-1)*packet_size,packet_size)
                 except:
                     print "bad crc"
                     partial_data = bytearray(0)
-                time.sleep(0.002)
-                if len(partial_data) == (50+6): 
+                time.sleep(0.01)
+                if len(partial_data) == (4+packet_size+2): 
                     break;
-            data +=partial_data[6:]
+            data +=partial_data[4:len(partial_data) - 2 ]
             print len(data), "/", length  
         return data  
 
-    def get_complete_sdft_echo(self, length):
+    def get_complete_sdft_echo(self, length,packet_size):
         """ get sdft echo timeseries of length 'length' """
-        truncated_len =  int(length / 50) + 1
+        truncated_len =  int(length / packet_size) + 1
         data = bytearray()
         for i in range (1,truncated_len):
             while(True):
-                partial_data = self.get_sdft_echo((i-1)*50,50)
+                try:
+                        partial_data = self.get_sdft_echo((i-1)*packet_size,packet_size)
+                except:
+                        print "bad crc"
+                        partial_data = bytearray(0)
                 time.sleep(0.01)
-                if len(partial_data) == 50: 
+                if len(partial_data) == (4+packet_size+2): 
                     break;
-            data +=partial_data
-        print len(data)  
+            data +=partial_data[4:len(partial_data) - 2 ]
+            print len(data), "/", length 
         return data  
 
     def get_height(self):
@@ -328,7 +333,8 @@ class Fuelsensor_interface(object):
                             print "time elapsed: ",
                             print str(stop_time - start_time)
                             print "data received ok: ",
-                            self.print_modbus(data)
+                            if(verbose):
+                                self.print_modbus(data)
 
 
                         return data
