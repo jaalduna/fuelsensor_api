@@ -17,10 +17,12 @@ params.sdft_n.get_value()
 params.sdft_k.get_value()
 params.sdft_k.set_value(49)
 params.sdft_peak.get_value()
+params.pga_gain.set_value(0)
 
 print "N:", params.sdft_n.value
 print "k:", params.sdft_k.value
 print "sdft paek: ", params.sdft_peak.value
+print "pga gain: ", params.pga_gain.value
 params.sdft_i_min.interface.close_socket()
 
 
