@@ -3,6 +3,7 @@ from Fuelsensor_interface import Fuelsensor_interface
 import time
 import matplotlib.pyplot as plt
 import struct
+import pickle
 
 if len(sys.argv) == 5:
     fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
@@ -40,8 +41,8 @@ for i in range(0,length/4):
     data_norm.append(new_data[0])
 print len(data_norm)
 
-for i in range(1,len(data_norm)):
-    print data_norm[i]
+for i in range(1,len(data_norm))
+:    print data_norm[i]
 
 plt.plot(data_norm)
 plt.grid(True)
@@ -50,5 +51,5 @@ plt.ylabel('norm echo')
 plt.show()
 
 
-i_min = 250
-
+with open('noise_raw_data', 'w') as f:  # Python 3: open(..., 'wb')
+    pickle.dump([data_norm], f) 
