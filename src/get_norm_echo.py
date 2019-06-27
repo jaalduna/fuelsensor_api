@@ -51,5 +51,5 @@ plt.ylabel('norm echo')
 plt.show()
 
 
-with open('noise_raw_data', 'w') as f:  # Python 3: open(..., 'wb')
+with open('noise_raw_data3', 'w') as f:  # Python 3: open(..., 'wb')
     pickle.dump([data_norm], f) 
