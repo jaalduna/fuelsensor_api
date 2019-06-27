@@ -41,8 +41,8 @@ for i in range(0,length/4):
     data_norm.append(new_data[0])
 print len(data_norm)
 
-for i in range(1,len(data_norm))
-:    print data_norm[i]
+for i in range(1,len(data_norm)):
+    print data_norm[i]
 
 plt.plot(data_norm)
 plt.grid(True)
