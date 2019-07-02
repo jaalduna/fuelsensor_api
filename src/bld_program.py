@@ -9,7 +9,7 @@ b.connect()
 if len(sys.argv) > 3:
     b.program_file(str(sys.argv[3]))
 else:
-    b.program_file('./firmware/aiko1.X.production.hex')
+    b.program_file('./firmware/develop.hex')
     
 b.close_socket()
 b.connect()
