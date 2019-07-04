@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import random
 import time
 import json 
+import sys
 from Fuelsensor_interface import Fuelsensor_interface
 
 
@@ -10,7 +11,16 @@ class FuelMqtt(mqtt.Client,Fuelsensor_interface):
         super(FuelMqtt, self).__init__(cname)
         #super(FuelMqtt, self).__init__()
         #self.client = mqtt.Client(client_id='seba-pub', clean_session=False)
-        self.fs_interface = Fuelsensor_interface(TCP_IP='192.168.100.187',TCP_PORT=5000)
+        if len(sys.argv) == 3:
+            fs_interface = Fuelsensor_interface(str(sys.argv[1]),int(sys.argv[2]))
+            self.fs_interface = fs_interface
+        else:
+             fs_interface = Fuelsensor_interface()
+
+           
+        
+            #fs_interface = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
+           
         #self.altura = self.get_height()
         self.altura = self.fs_interface.get_height()
         self.connect(host='127.0.0.1', port=1883)
@@ -24,33 +34,17 @@ class FuelMqtt(mqtt.Client,Fuelsensor_interface):
     	topic=msg.topic
 
 
+
+
+
 fs_mqtt = FuelMqtt(cname='seba-pub')
-#print 'subscribing'
+
+#fs_mqtt.fs_interface.Fuelsensor_interface('192.168.100.187',5000)
 #fs_mqtt.client.connect(host='127.0.0.1', port=1883)
-#print 'publishing'
+#altura=fs_mqtt.altura()
 #altura=float(fs_mqtt.altura())
+print "publicando"
 fs_mqtt.publish("camion/sensor",fs_mqtt.altura)
-#print 'publishing'
-time.sleep(0.1)
-
-
-
-#fs_mqtt.socket.close()
-    
- 
-    #def on_message(self,client, userdata, message):
-     #   print "msg received"
-      #  print('------------------------------')
-       # print('topic: %s' % message.topic)
-        #print('payload: %s' % message.payload)
-       # print('qos: %d' % message.qos)
-
-
-# client = mqtt.Client()
-# client.connect('127.0.0.1',1883,60)
-# client.loop_start()
-# client.subscribe(topic='camion/sensor', qos=2)
-# client.publish('camion/sensor','hola mundo!')
-# time.sleep(1)
-# client.loop_stop()
+print 
+time.sleep(1)
 

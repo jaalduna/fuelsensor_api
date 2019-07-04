@@ -249,7 +249,7 @@ class Fuelsensor_interface(object):
         data = self.send_cmd_without_params(GET_HEIGHT, 8)
 
         height = struct.unpack('<f', data[4:8])[0]
-        print "height: " + str(height) + " [m]"
+        print  str(height)+" [m]"
         return height
 
     def get_pos(self):
@@ -287,14 +287,14 @@ class Fuelsensor_interface(object):
         """ Try to stablish a tcp/ip connection with fuelSensor device"""
         while True:
             try:
-                print "connecting...",
+                #print "connecting...",
                 self.socket.settimeout(self.timeout)
                 self.socket.connect((self.TCP_IP, self.TCP_PORT))
                 #self.socket.settimeout(None)
-                print "success!"
+                #print "success!"
                 return
             except:
-                print "can't connect"
+                #print "can't connect"
                 self.close_socket()
                 #return
 
@@ -341,7 +341,7 @@ class Fuelsensor_interface(object):
                 
             except:
                 #self.print_modbus(data)
-                print "no answer...",
+                #print "no answer...",
                 
                 if(True):
                     self.close_socket()

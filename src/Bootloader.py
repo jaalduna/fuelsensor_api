@@ -172,14 +172,14 @@ class Bootloader(object):
         """Try to stablish a tcp/ip socket with FuelSensor device. """
         while True:
             try:
-                print "connecting...",
+                #print "connecting...",
                 self.socket.settimeout(self.timeout)
                 self.socket.connect((self.TCP_IP, self.TCP_PORT))
                 #self.socket.settimeout(None)
-                print "success!"
+                #print "success!"
                 return
             except:
-                print "can't connect"
+                #print "can't connect"
                 self.close_socket()
                 #return
 
@@ -225,7 +225,7 @@ class Bootloader(object):
                 
             except:
                 
-                print "no answer...",
+                print #"no answer...",
                 
                 if(True):
                     self.close_socket()

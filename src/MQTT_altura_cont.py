@@ -29,28 +29,6 @@ fs_mqtt = FuelMqtt(cname='seba-pub')
 #fs_mqtt.client.connect(host='127.0.0.1', port=1883)
 #print 'publishing'
 #altura=float(fs_mqtt.altura())
-fs_mqtt.publish("camion/sensor",fs_mqtt.altura)
-#print 'publishing'
-time.sleep(0.1)
-
-
-
-#fs_mqtt.socket.close()
-    
- 
-    #def on_message(self,client, userdata, message):
-     #   print "msg received"
-      #  print('------------------------------')
-       # print('topic: %s' % message.topic)
-        #print('payload: %s' % message.payload)
-       # print('qos: %d' % message.qos)
-
-
-# client = mqtt.Client()
-# client.connect('127.0.0.1',1883,60)
-# client.loop_start()
-# client.subscribe(topic='camion/sensor', qos=2)
-# client.publish('camion/sensor','hola mundo!')
-# time.sleep(1)
-# client.loop_stop()
-
+while True:
+    fs_mqtt.publish("camion/sensor",fs_mqtt.altura)
+    time.sleep(1)
