@@ -39,6 +39,7 @@ for i in range(0,length/4):
     #     pass
     #     new_data = (0.5,1)
     data_norm.append(new_data[0])
+
 print len(data_norm)
 
 for i in range(1,len(data_norm)):
@@ -51,5 +52,5 @@ plt.ylabel('norm echo')
 plt.show()
 
 
-with open('noise_raw_data3', 'w') as f:  # Python 3: open(..., 'wb')
-    pickle.dump([data_norm], f) 
+with open('noise_raw_data', 'w') as f:  # Python 3: open(..., 'wb')
+    pickle.dump([data_norm], f)  

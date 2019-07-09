@@ -169,6 +169,7 @@ class Fuelsensor_interface(object):
                     if crc == calculated_crc:
                         break
                     else:
+                        self.close_socket()
                         raise Exception("bad crc")
                 else:
                     # print len(data)
@@ -255,7 +256,6 @@ class Fuelsensor_interface(object):
     def get_pos(self):
         """ get variable pos, an int value proportional to hight"""
         data = self.send_cmd_without_params(GET_POS, 8)
-        self.print_modbus(data)
         pos = struct.unpack('<f', data[4:8])[0]
         print "pos: " + str(pos) + " [samples]" 
         return pos   
@@ -396,7 +396,6 @@ class Fuelsensor_interface(object):
         #update param on the remote node
         response = self.send_cmd(SET_PARAM, param_field, num_bytes_response +4) #+4 is for header size
         #update param on the local representation of the node
-        self.print_modbus(response)
         return response
 
     def set_param_byte(self, param_id,value):
@@ -412,6 +411,9 @@ class Fuelsensor_interface(object):
         value_field =  struct.pack('<f',value)
         response = self.set_param(param_id, 4, value_field)  
         return response
+
+    def backup_params_to_flash(self):
+        response = self.send_cmd_without_params(BACKUP_PARAMS_TO_FLASH,4)
 
     def send_batch(self,packet):
         packet_size = 4 
