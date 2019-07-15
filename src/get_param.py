@@ -5,7 +5,7 @@ from Fuelsensor_interface import Params
 if len(sys.argv) == 3:
     fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
 else:
-    fs = Fuelsensor_interface('192.168.1.101', 5000)
+    fs = Fuelsensor_interface('192.168.100.187', 5000)
 
 params = Params(fs)
 
@@ -20,7 +20,7 @@ params.sdft_n.get_value()
 params.sdft_k.get_value()
 params.sdft_k.set_value(49)
 params.sdft_peak.get_value()
-params.pga_gain.set_value(4)
+params.pga_gain.set_value(2)
 params.num_pulses.set_value(5)
 params.num_pulses.get_value()
 print "N:", params.sdft_n.value

@@ -249,7 +249,7 @@ class Fuelsensor_interface(object):
         data = self.send_cmd_without_params(GET_HEIGHT, 8)
 
         height = struct.unpack('<f', data[4:8])[0]
-        print  str(height)+" [m]"
+        print  str(height)+"[m]"
         return height
 
     def get_pos(self):
@@ -436,7 +436,7 @@ class Fuelsensor_interface(object):
         self.socket.send(bytearray(byte))
 
 
-class Log(object):
+class Log(object):	
     """Log class. It describes the sructure of data logs.
 
     Args:

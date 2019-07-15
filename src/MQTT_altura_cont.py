@@ -24,11 +24,15 @@ class FuelMqtt(mqtt.Client,Fuelsensor_interface):
     	topic=msg.topic
 
 
+
 fs_mqtt = FuelMqtt(cname='seba-pub')
 #print 'subscribing'
 #fs_mqtt.client.connect(host='127.0.0.1', port=1883)
 #print 'publishing'
 #altura=float(fs_mqtt.altura())
-while True:
+while 1>0:
+
     fs_mqtt.publish("camion/sensor",fs_mqtt.altura)
-    time.sleep(1)
+
+    time.sleep(5)
+
