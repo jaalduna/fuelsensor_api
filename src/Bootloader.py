@@ -2,6 +2,7 @@ import struct
 import crcmod
 import socket
 import time
+
 #AN1388 Microchip bootloader implementation
 
 #constants declaration

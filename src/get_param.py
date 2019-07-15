@@ -10,9 +10,10 @@ else:
 params = Params(fs)
 
 params.sdft_i_min.interface.connect()
-params.sdft_i_min.get_value()
-print params.sdft_i_min.value
+params.pulse_period.get_value()
+print "pulse_period: ", params.pulse_period.value
 
+<<<<<<< HEAD
 params.sdft_i_min.set_value(1000)
 print params.sdft_i_min.value
 
@@ -31,6 +32,8 @@ print "sdft paek: ", params.sdft_peak.value
 print "pga gain: ", params.pga_gain.value
 print "num_pulses", params.num_pulses.value
 print "min_peak_value_th: ", params.sdft_min_peak_value_th.value
+=======
+>>>>>>> a4ac619847eb76e4eecce1493240419e00e92602
 params.sdft_i_min.interface.close_socket()
 
 
