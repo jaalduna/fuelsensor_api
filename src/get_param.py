@@ -20,7 +20,7 @@ params.sdft_n.get_value()
 params.sdft_k.get_value()
 params.sdft_k.set_value(49)
 params.sdft_peak.get_value()
-params.pga_gain.set_value(2)
+params.pga_gain.set_value(4)
 params.num_pulses.set_value(5)
 params.num_pulses.get_value()
 print "N:", params.sdft_n.value
