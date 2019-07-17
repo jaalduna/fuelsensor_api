@@ -8,9 +8,12 @@ else:
     fs = Fuelsensor_interface('192.168.100.187',5000)
     
 print "conectando"
-while(1):
+data_norm = []
+for i in range(1,50):
     fs.connect()
-    fs.get_height()
+    archivo= open("datos.txt",'w')
+    altura = data_norm[i]
+   	archivo.write(altura)
     #fs.backup_timeseries() # ver porque se pega la respuesta aqui, ver que hay en la interfaz serial o bien debugear el codigo, programando con el pickit 2.
     #fs.get_pos()
     fs.close_socket()
