@@ -59,8 +59,12 @@ class Bootloader(object):
         packet += struct.pack("<H", crc16(str(packet[1:len(packet)]))) # calculate CRC discarding SOH
         packet.append(EOT)
         packet = self.encode(packet)
-        response = self.receive_retry(packet,response_len,False, connect)
-        response = self.decode(response)
+        attempts = 3
+        while(attempts >0):
+            response = self.receive_retry(packet,response_len,False, connect)
+            response = self.decode(response)
+            if(response !=0):
+                break;
 
         self.print_modbus(str(response))
         if(self.check_crc(response)):
