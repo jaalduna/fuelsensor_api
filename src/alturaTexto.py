@@ -22,6 +22,7 @@ b = Bootloader('192.168.100.187',5000)
 
 while True:
 	try:
+		time.sleep(30)
 
 		fs.connect()
 		f = open("archivo.txt", "a+")
@@ -31,6 +32,7 @@ while True:
 		
 		print "obteniendo altura"
 		altura=fs.get_height()
+
 		print "copiando altura en archivo de texto..."
 		f.write(str(altura)+" "+localtime+ "\n")
 	except:
@@ -38,7 +40,10 @@ while True:
 		time.sleep(5)
 		fs.reset()
 		print "espera 30s ...."
-		time.sleep(32)
+		time.sleep(1)
+		f.write("----------------------------\n")
+		f.write("----------------------------\n")
+
 
 		
 	
