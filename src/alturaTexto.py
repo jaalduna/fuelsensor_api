@@ -20,9 +20,14 @@ b = Bootloader('192.168.100.187',5000)
 
 #for i in range(1,50):
 
+reset=0
+cont=0
 while True:
+	cont=cont+1
 	try:
-
+		
+		time.sleep(2)
+		#cont=cont+1
 		fs.connect()
 		f = open("archivo.txt", "a+")
 		print "archivo abierto"
@@ -31,28 +36,30 @@ while True:
 		
 		print "obteniendo altura"
 		altura=fs.get_height()
+
 		print "copiando altura en archivo de texto..."
-		f.write(str(altura)+" "+localtime+ "\n")
+		
+		f.write(str(cont)+" "+str(altura)+" "+localtime+" "+str(reset)+"\n")
+
 	except:
 		print "except"
+		reset=reset+1
+		#cont=cont+1
+
+		localtime = time.asctime( time.localtime(time.time()))
 		time.sleep(5)
 		fs.reset()
+		#cont=cont+1
+		print "espera 5s ...."
 		time.sleep(1)
-		print "saltando a la api"
-		b.jump_to_app()
-		time.sleep(3)
-		print "pidiendo altura"
-		try:
-			fs.get_height():
-		except:
-			print "except 2"
 
+		f.write(str(cont)+" -------------- "+localtime+" "+str(reset)+"\n")
+
+		#f.write("----------------------------\n")
+		
 
 
 		
-		print "cerrando socket"
-		fs.close_socket()
-		time.sleep(2)
 	
 
 		#b.jump_to_app()
