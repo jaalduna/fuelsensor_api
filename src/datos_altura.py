@@ -38,9 +38,14 @@ while True:
 		time.sleep(3)
 
 		b.connect()
-
-		b.jump_to_app()
 		print "saltando a api FS"
+		b.jump_to_app()
+		try:
+			print "obteniedo altura"
+			fs.get_height()
+		except:
+			print "except2"
+		
 #print "Jump to app"
 
 		b.close_socket()

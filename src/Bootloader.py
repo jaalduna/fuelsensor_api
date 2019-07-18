@@ -115,9 +115,9 @@ class Bootloader(object):
         packet.append(JUMP_TO_APP)
         packet += struct.pack("<H", crc16(str(packet[1:len(packet)]))) # calculate CRC discarding SOH
         packet.append(EOT)
-        packet = self.encode(packet)
+        packet = self.encode(packet)        
         self.socket.send(packet)
-        # response = self.receive_retry(packet,0,False)
+        #response = self.receive_retry(packet,0,False)
 
     def check_crc(self, msg):
         calculated_crc = bytearray()
