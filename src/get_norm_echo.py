@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import struct
 import pickle
 
-if len(sys.argv) == 5:
+if len(sys.argv) == 6:
     fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
 else:
     print "not enought parameters, using default"
@@ -52,5 +52,5 @@ plt.ylabel('norm echo')
 plt.show()
 
 
-with open('noise_raw_data', 'w') as f:  # Python 3: open(..., 'wb')
+with open(str(sys.argv[5], 'w') as f:  # Python 3: open(..., 'wb')
     pickle.dump([data_norm], f)  
