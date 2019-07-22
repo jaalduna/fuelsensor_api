@@ -109,6 +109,7 @@ class Node(object):
         self.params = Params(self.fs_interface)
 
 class Fuelsensor_interface(object):
+
     """Fuelsensor_interface class """
 
     #command constants
@@ -135,6 +136,71 @@ class Fuelsensor_interface(object):
 
     def __del__(self):
         self.socket.close()
+
+    def BD_heigth(self):
+        params = Params(self)
+        reset=0
+        cont=0
+        while True:
+            cont=cont+1
+            try:
+                
+                time.sleep(2)
+                #cont=cont+1
+                self.connect()
+                f = open("archivo.txt", "a+")
+                print "archivo abierto"
+                localtime = time.asctime( time.localtime(time.time()))
+            #data.append(fs.get_height)
+                
+                print "obteniendo altura..."
+                altura=self.get_height()
+
+                print "copiando altura en archivo de texto..."
+                
+                f.write(str(cont)+" "+str(altura)+" "+localtime+" "+str(reset)+"\n")
+
+            except:
+                print "except"
+                reset=reset+1
+                #cont=cont+1
+
+                localtime = time.asctime( time.localtime(time.time()))
+                
+                time.sleep(4)
+                print "waiting reset..."
+                self.reset()
+                #cont=cont+1
+                print "reset..."
+                time.sleep(1)
+                params.sdft_i_min.interface.connect()
+                params.sdft_i_min.get_value()
+                print params.sdft_i_min.value
+
+                #params.sdft_i_min.set_value(200)
+                #print params.sdft_i_min.value
+
+                params.sdft_n.get_value()
+                params.sdft_k.get_value()
+                #params.sdft_k.set_value(49)
+                params.sdft_peak.get_value()
+                #params.pga_gain.set_vale(4)
+                params.pga_gain.get_value()
+                #params.num_pulses.set_value(5)
+                params.num_pulses.get_value()
+                print "N:", params.sdft_n.value
+                print "k:", params.sdft_k.value
+                print "sdft paek: ", params.sdft_peak.value
+                print "pga gain: ", params.pga_gain.value
+                print "num_pulses", params.num_pulses.value
+                params.sdft_i_min.interface.close_socket()
+                #fs.backup_params_to_flash()
+
+                f.write(str(cont)+" -------------- "+localtime+" "+str(reset)+"\n")
+            f.close()
+            self.close_socket()
+            time.sleep(2)
+        
 
     def send_cmd(self, cmd, params,rx_len,verbose=False):
         """ send a cmd to the device """
@@ -251,6 +317,7 @@ class Fuelsensor_interface(object):
         height = struct.unpack('<f', data[4:8])[0]
         print  str(height)+"[m]"
         return height
+
 
     def get_pos(self):
         """ get variable pos, an int value proportional to hight"""
@@ -453,7 +520,7 @@ class Log(object):
         # timestamp, hight
     def log_parser(self,raw_log):
         """ read raw_log, parse it, create and update object attributes"""        
-        
+   
 
 
 
