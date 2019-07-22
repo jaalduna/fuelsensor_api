@@ -21,6 +21,7 @@ b = Bootloader('192.168.100.187',5000)
 params = Params(fs)
 reset=0
 cont=0
+
 while True:
 	cont=cont+1
 	try:
@@ -33,7 +34,7 @@ while True:
 		localtime = time.asctime( time.localtime(time.time()))
 	#data.append(fs.get_height)
 		
-		print "obteniendo altura"
+		print "obteniendo altura..."
 		altura=fs.get_height()
 
 		print "copiando altura en archivo de texto..."
@@ -46,8 +47,9 @@ while True:
 		#cont=cont+1
 
 		localtime = time.asctime( time.localtime(time.time()))
-		time.sleep(5)
-		print "espera 5s..."
+		
+		time.sleep(4)
+		print "waiting reset..."
 		fs.reset()
 		#cont=cont+1
 		print "reset..."
@@ -56,14 +58,15 @@ while True:
 		params.sdft_i_min.get_value()
 		print params.sdft_i_min.value
 
-		params.sdft_i_min.set_value(200)
-		print params.sdft_i_min.value
+		#params.sdft_i_min.set_value(200)
+		#print params.sdft_i_min.value
 
 		params.sdft_n.get_value()
 		params.sdft_k.get_value()
 		#params.sdft_k.set_value(49)
 		params.sdft_peak.get_value()
-		#params.pga_gain.set_value(4)
+		#params.pga_gain.set_vale(4)
+		params.pga_gain.get_value()
 		#params.num_pulses.set_value(5)
 		params.num_pulses.get_value()
 		print "N:", params.sdft_n.value
@@ -75,20 +78,6 @@ while True:
 		#fs.backup_params_to_flash()
 
 		f.write(str(cont)+" -------------- "+localtime+" "+str(reset)+"\n")
-
-		#f.write("----------------------------\n")
-		
-
-
-		
-	
-
-		#b.jump_to_app()
-		#b.close_socket()
-
-
-
-	#print "close socket..."
 	f.close()
 	fs.close_socket()
 	time.sleep(2)
