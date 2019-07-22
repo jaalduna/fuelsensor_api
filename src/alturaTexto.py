@@ -56,8 +56,8 @@ while True:
 		params.sdft_i_min.get_value()
 		print params.sdft_i_min.value
 
-		#params.sdft_i_min.set_value(200)
-		#print params.sdft_i_min.value
+		params.sdft_i_min.set_value(200)
+		print params.sdft_i_min.value
 
 		params.sdft_n.get_value()
 		params.sdft_k.get_value()
@@ -72,6 +72,7 @@ while True:
 		print "pga gain: ", params.pga_gain.value
 		print "num_pulses", params.num_pulses.value
 		params.sdft_i_min.interface.close_socket()
+		#fs.backup_params_to_flash()
 
 		f.write(str(cont)+" -------------- "+localtime+" "+str(reset)+"\n")
 

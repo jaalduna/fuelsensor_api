@@ -291,10 +291,10 @@ class Fuelsensor_interface(object):
                 self.socket.settimeout(self.timeout)
                 self.socket.connect((self.TCP_IP, self.TCP_PORT))
                 #self.socket.settimeout(None)
-                #print "success!"
+                print "success!"
                 return
             except:
-                #print "can't connect"
+                print "can't connect"
                 self.close_socket()
                 #return
 
@@ -341,7 +341,7 @@ class Fuelsensor_interface(object):
                 
             except:
                 #self.print_modbus(data)
-                #print "no answer...",
+                print "no answer...",
                 
                 if(True):
                     self.close_socket()
@@ -412,6 +412,8 @@ class Fuelsensor_interface(object):
         value_field =  struct.pack('<f',value)
         response = self.set_param(param_id, 4, value_field)  
         return response
+    def backup_params_to_flash(self):
+        response = self.send_cmd_without_params(BACKUP_PARAMS_TO_FLASH,4)
 
     def send_batch(self,packet):
         packet_size = 4 

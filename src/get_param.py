@@ -28,6 +28,8 @@ print "k:", params.sdft_k.value
 print "sdft paek: ", params.sdft_peak.value
 print "pga gain: ", params.pga_gain.value
 print "num_pulses", params.num_pulses.value
+fs.backup_params_to_flash()
+
 params.sdft_i_min.interface.close_socket()
 
 
