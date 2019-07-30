@@ -1,0 +1,27 @@
+success!
+data_vector_type:  0
+data_vector_offset:  0
+pga_gain:  2
+num_pulses:  10
+pulse_period:  87
+pulse_width:  7
+res_hv:  40
+
+sdft_min_peak_value_th:  0.5
+sdft_k:  39
+sdft_n:  107
+sdft_i_min:  450
+sdft_min_eco_limit:  30
+sdft_max_eco_limit:  80
+sdft_var_norm:  50000.0
+sdft_peak:  10.0
+sdft_sound_speed:  1495
+sdft_sample_rate:  2981
+sdft_n_samples_one_valid:  20
+skip_param:  20000
+
+
+repentinamete el piso electrico dejo de sonar despues de pedir 1 echo, luego de esto se pide la altura no obteniendo respuesta,
+pasado un tiempo de Xs el FS vuelve a responder con una altura correcta, luego de esto dejo de sonar repetinamente no obteniendo 
+respuesta, pasado un tiempo de 90s el FS vuelve a sonar y entregar una altura correcta.
+cronometrado de 1 min 30 s el FS vuelve a sonar 

@@ -21,7 +21,6 @@ b = Bootloader('192.168.100.187',5000)
 # params = Params(fs)
 # reset=0
 # cont=0
-
 fs.BD_heigth()
 
 

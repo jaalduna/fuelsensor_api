@@ -145,7 +145,7 @@ class Fuelsensor_interface(object):
             cont=cont+1
             try:
                 
-                time.sleep(2)
+                time.sleep(10)
                 #cont=cont+1
                 self.connect()
                 f = open("archivo.txt", "a+")
@@ -167,12 +167,12 @@ class Fuelsensor_interface(object):
 
                 localtime = time.asctime( time.localtime(time.time()))
                 
-                time.sleep(4)
+                time.sleep(5)
                 print "waiting reset..."
                 self.reset()
                 #cont=cont+1
                 print "reset..."
-                time.sleep(1)
+                time.sleep(2)
                 params.sdft_i_min.interface.connect()
                 params.sdft_i_min.get_value()
                 print params.sdft_i_min.value
@@ -193,6 +193,8 @@ class Fuelsensor_interface(object):
                 print "sdft paek: ", params.sdft_peak.value
                 print "pga gain: ", params.pga_gain.value
                 print "num_pulses", params.num_pulses.value
+                f.write(str(cont)+" "+"n= "+str(params.sdft_n.value)+" "+"k= "+str(params.sdft_k.value)+" "+"peak= "+str(params.sdft_peak.value)+" "+"gain= "+str(params.pga_gain.value)+" "+"pulses= "+str(params.num_pulses.value)+"\n")
+                cont=cont+1
                 params.sdft_i_min.interface.close_socket()
                 #fs.backup_params_to_flash()
 

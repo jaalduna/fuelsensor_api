@@ -1,0 +1,25 @@
+data_vector_type:  0
+data_vector_offset:  0
+pga_gain:  4
+num_pulses:  10
+pulse_period:  92
+pulse_width:  6
+res_hv:  0
+
+sdft_min_peak_value_th:  0.5
+sdft_k:  39
+sdft_n:  107
+sdft_i_min:  450
+sdft_min_eco_limit:  30
+sdft_max_eco_limit:  80
+sdft_var_norm:  50000.0
+sdft_peak:  10.0
+sdft_sound_speed:  1495
+sdft_sample_rate:  2981
+sdft_n_samples_one_valid:  20
+skip_param:  20000
+
+El primer encendido funnciona perfecto entregando una altura correcta, cuando se aplico un self.reset() y luego un bld_jump()
+al pedir altura, nos entrega una altura con valor 0, luego se hizo un eco_4.
+luego al aplicar el comando set_all_params nos entrega una altura correcta, posteriormente se hixo un eco_5
+

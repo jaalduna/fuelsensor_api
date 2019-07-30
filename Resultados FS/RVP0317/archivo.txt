@@ -1,0 +1,24 @@
+data_vector_type:  0
+data_vector_offset:  0
+pga_gain:  2
+num_pulses:  10
+pulse_period:  92
+pulse_width:  6
+res_hv:  40
+
+sdft_min_peak_value_th:  0.20000000298
+sdft_k:  39
+sdft_n:  107
+sdft_i_min:  450
+sdft_min_eco_limit:  30
+sdft_max_eco_limit:  80
+sdft_var_norm:  50000.0
+sdft_peak:  10.0
+sdft_sound_speed:  1495
+sdft_sample_rate:  2981
+sdft_n_samples_one_valid:  20
+skip_param:  20000
+
+
+el sonido del piso no fue el esperado, los ecos tampoco, los comandos funcionan bien, al 4to intento
+de posicionamiento el sensor responde bien.
