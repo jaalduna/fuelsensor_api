@@ -58,8 +58,14 @@ class Bootloader(object):
         packet += struct.pack("<H", crc16(str(packet[1:len(packet)]))) # calculate CRC discarding SOH
         packet.append(EOT)
         packet = self.encode(packet)
-        response = self.receive_retry(packet,response_len,False, connect)
-        response = self.decode(response)
+        # response = self.receive_retry(packet,response_len,False, connect)
+        # response = self.decode(response)
+        attempts = 3
+        while(attempts >0):
+            response = self.receive_retry(packet,response_len,False, connect)
+            response = self.decode(response)
+            if(response !=0):
+                break;
 
         #self.print_modbus(str(response)) # imprime numero Mac antes de dar la version Bootloader 
         if(self.check_crc(response)):
@@ -229,7 +235,8 @@ class Bootloader(object):
                 
                 if(True):
                     self.close_socket()
-                    self.connect()
+                    break
+                    #self.connect()
 
     def close_socket(self):
         """ Try to close socket connection."""

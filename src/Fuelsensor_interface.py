@@ -18,7 +18,12 @@ GET_PARAM = 7
 SET_PARAM = 8
 RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
 BACKUP_PARAMS_TO_FLASH = 10
-
+GET_APP_VERSION = 11
+GET_TEMP = 12
+GET_ID = 13
+GET_TIMESTAMP = 14
+SET_TIMESTAMP = 15
+GET_IMU_ACCEL_VAR = 16
 
 #TODO: create a list of PARAMS constants using fields "PARAM_ID" and "nombre" from
 # the table "lista de parametros" located at
@@ -109,7 +114,6 @@ class Node(object):
         self.params = Params(self.fs_interface)
 
 class Fuelsensor_interface(object):
-
     """Fuelsensor_interface class """
 
     #command constants
@@ -123,6 +127,12 @@ class Fuelsensor_interface(object):
     SET_PARAM = 8
     RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
     BACKUP_PARAMS_TO_FLASH = 10
+    GET_APP_VERSION = 11
+    GET_TEMP = 12
+    GET_ID = 13
+    GET_TIMESTAMP = 14
+    SET_TIMESTAMP = 15
+    GET_IMU_ACCEL_VAR = 16
 
     def __init__(self,TCP_IP='192.168.0.10',TCP_PORT=5000):
         super(Fuelsensor_interface, self).__init__()
@@ -136,7 +146,7 @@ class Fuelsensor_interface(object):
 
     def __del__(self):
         self.socket.close()
-
+        
     def BD_heigth(self):
         params = Params(self)
         reset=0
@@ -145,7 +155,7 @@ class Fuelsensor_interface(object):
             cont=cont+1
             try:
                 
-                time.sleep(10)
+                time.sleep(2)
                 #cont=cont+1
                 self.connect()
                 f = open("archivo.txt", "a+")
@@ -167,12 +177,12 @@ class Fuelsensor_interface(object):
 
                 localtime = time.asctime( time.localtime(time.time()))
                 
-                time.sleep(5)
+                time.sleep(4)
                 print "waiting reset..."
                 self.reset()
                 #cont=cont+1
                 print "reset..."
-                time.sleep(2)
+                time.sleep(1)
                 params.sdft_i_min.interface.connect()
                 params.sdft_i_min.get_value()
                 print params.sdft_i_min.value
@@ -193,8 +203,6 @@ class Fuelsensor_interface(object):
                 print "sdft paek: ", params.sdft_peak.value
                 print "pga gain: ", params.pga_gain.value
                 print "num_pulses", params.num_pulses.value
-                f.write(str(cont)+" "+"n= "+str(params.sdft_n.value)+" "+"k= "+str(params.sdft_k.value)+" "+"peak= "+str(params.sdft_peak.value)+" "+"gain= "+str(params.pga_gain.value)+" "+"pulses= "+str(params.num_pulses.value)+"\n")
-                cont=cont+1
                 params.sdft_i_min.interface.close_socket()
                 #fs.backup_params_to_flash()
 
@@ -237,6 +245,7 @@ class Fuelsensor_interface(object):
                     if crc == calculated_crc:
                         break
                     else:
+                        self.close_socket()
                         raise Exception("bad crc")
                 else:
                     # print len(data)
@@ -315,16 +324,51 @@ class Fuelsensor_interface(object):
     def get_height(self):
         """ get hight of liquid in meters."""    
         data = self.send_cmd_without_params(GET_HEIGHT, 8)
-
         height = struct.unpack('<f', data[4:8])[0]
-        print  str(height)+"[m]"
+        print "height: " + str(height) + " [m]"
         return height
 
+    def get_temp(self):
+        data = self.send_cmd_without_params(GET_TEMP, 8)
+        temp = struct.unpack('<f', data[4:8])[0]
+        print "temp: " + str(temp) + " [C]"
+        return temp
+
+    def get_id(self):
+        data = self.send_cmd_without_params(GET_ID, 12)
+        node_id = data[4:-2]
+        self.print_modbus(str(node_id))
+        return data
+
+    def get_app_version(self):
+        data = self.send_cmd_without_params(GET_APP_VERSION,6)
+        versions = struct.unpack('<bb',data[4:6])
+        self.print_modbus(str(data))
+        mayor_version = versions[0]
+        self.print_modbus(str(mayor_version))
+        minor_version = versions[1]
+        print "App version: " + str(mayor_version) + "." + str(minor_version)
+        return
+
+    def get_timestamp(self):
+        data = self.send_cmd_without_params(GET_TIMESTAMP,11)
+        self.print_modbus(str(data))
+        return
+
+    def set_timestamp(self,sec,minutes,hour,wday,date,month, year):
+        params = bytearray([sec,minutes, hour, wday, date, month, year,0])
+        data = self.send_cmd(SET_TIMESTAMP, params,4,False)
+        self.print_modbus(str(data))
+        return
+
+    def get_imu_accel_var(self):
+        data = self.send_cmd_without_params(GET_IMU_ACCEL_VAR, 8)
+        result = struct.unpack('<f', data[4:8])[0]
+        print "imu accel var: " + str(result)
 
     def get_pos(self):
         """ get variable pos, an int value proportional to hight"""
         data = self.send_cmd_without_params(GET_POS, 8)
-        self.print_modbus(data)
         pos = struct.unpack('<f', data[4:8])[0]
         print "pos: " + str(pos) + " [samples]" 
         return pos   
@@ -414,7 +458,8 @@ class Fuelsensor_interface(object):
                 
                 if(True):
                     self.close_socket()
-                    self.connect()
+                    break
+                    #self.connect()
 
     def close_socket(self):
         """ Try to close tcp/ip SOCKET with FuelSensor device"""
@@ -465,7 +510,6 @@ class Fuelsensor_interface(object):
         #update param on the remote node
         response = self.send_cmd(SET_PARAM, param_field, num_bytes_response +4) #+4 is for header size
         #update param on the local representation of the node
-        self.print_modbus(response)
         return response
 
     def set_param_byte(self, param_id,value):
@@ -481,6 +525,7 @@ class Fuelsensor_interface(object):
         value_field =  struct.pack('<f',value)
         response = self.set_param(param_id, 4, value_field)  
         return response
+
     def backup_params_to_flash(self):
         response = self.send_cmd_without_params(BACKUP_PARAMS_TO_FLASH,4)
 
@@ -507,7 +552,7 @@ class Fuelsensor_interface(object):
         self.socket.send(bytearray(byte))
 
 
-class Log(object):	
+class Log(object):
     """Log class. It describes the sructure of data logs.
 
     Args:
@@ -522,7 +567,7 @@ class Log(object):
         # timestamp, hight
     def log_parser(self,raw_log):
         """ read raw_log, parse it, create and update object attributes"""        
-   
+        
 
 
 
