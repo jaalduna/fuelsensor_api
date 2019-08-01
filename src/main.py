@@ -11,12 +11,12 @@ port = y["port"]
 
 print "ip: " + y["ip"]
 print "port: " + str(y["port"])
-#print "arg 2: " + sys.argv[2]
+# #print "arg 2: " + sys.argv[2]
 b = Bootloader(ip,port)
-#b.read_version()
-b.connect()
-b.jump_to_app()
-#print "Jump to app"
+b.read_version()
+# b.connect()
+# b.jump_to_app()
+# #print "Jump to app"
 
-b.close_socket()
+# b.close_socket()
 
