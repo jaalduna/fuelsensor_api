@@ -61,7 +61,7 @@ class Bootloader(object):
         response = self.receive_retry(packet,response_len,False, connect)
         response = self.decode(response)
 
-        self.print_modbus(str(response))
+        #self.print_modbus(str(response)) # imprime numero Mac antes de dar la version Bootloader 
         if(self.check_crc(response)):
             pass
             #print "crc ok"
@@ -186,7 +186,7 @@ class Bootloader(object):
     def receive_retry(self,packet,length,verbose = False,connect = True):
         start_time = 0
         stop_time = 0
-        print connect
+        #print connect
         if(connect):
             self.connect()
         while True:

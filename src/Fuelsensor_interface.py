@@ -360,10 +360,10 @@ class Fuelsensor_interface(object):
                 self.socket.settimeout(self.timeout)
                 self.socket.connect((self.TCP_IP, self.TCP_PORT))
                 #self.socket.settimeout(None)
-                print "success!"
+                #print "success!"
                 return
             except:
-                print "can't connect"
+                #print "can't connect"
                 self.close_socket()
                 #return
 
