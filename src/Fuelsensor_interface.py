@@ -193,6 +193,32 @@ class Fuelsensor_interface(object):
                 self.send_batch(packet)
                 return
         return data
+    def get_periodic_report(self, rx_len,log,verbose= False):
+        while(True):
+            data = self.receive_periodic(rx_len)
+            if(len(data) >= rx_len + 2):
+                data = data[0:rx_len + 2] #chunk garbage bytes
+                crc = str(data[len(data) - 2:])
+                calculated_crc = struct.pack('>H', crc16(str(data[4:len(data)- 2])))
+                if(verbose):
+                    self.print_modbus(str(data))
+                if crc == calculated_crc:
+                    break
+                else:
+                    self.close_socket()
+                    log.warning("bad crc")
+                    raise Exception("bad crc")
+
+            else:   
+                # print len(data)
+                #self.print_modbus(data)
+                log.warning("not enought rx bytes")
+                raise Exception("not enougth rx bytes")
+                break
+
+        height = struct.unpack('<f', data[4:8])[0]
+        print "height: " + str(height) + " [m]"
+        return height
 
     def bk_timeseries(self):
         """ backup timeseries on node. 
@@ -263,6 +289,7 @@ class Fuelsensor_interface(object):
         print "height: " + str(height) + " [m]"
         return height
 
+
     def get_temp(self):
         data = self.send_cmd_without_params(GET_TEMP, 8)
         temp = struct.unpack('<f', data[4:8])[0]
@@ -331,22 +358,45 @@ class Fuelsensor_interface(object):
         # print(":".join("{:02x}".format(ord(c)) for c in str(packet)))
 
 
-    def connect(self):
+    def connect(self,verbose=True):
         """ Try to stablish a tcp/ip connection with fuelSensor device"""
         while True:
             try:
-                print "connecting...",
+                if(verbose):
+                    print "connecting...",
                 self.socket.settimeout(self.timeout)
                 self.socket.connect((self.TCP_IP, self.TCP_PORT))
                 #self.socket.settimeout(None)
-                print "success!"
+                if(verbose):
+                    print "success!"
                 return
             except:
-                print "can't connect"
+                if(verbose):
+                    print "can't connect"
                 self.close_socket()
                 #return
+    def receive_periodic(self,length):
+        self.connect(False)
+        print "waiting for report-> ", 
+        data = ""
+        while(True):
+            try:
+                counter = 5
+                while(counter >0):
+                    counter -=1
+                    data += self.socket.recv(self.BUFFER_SIZE)
+                    if(len(data) >= length):
+                        print "pkg received!"
+                        self.close_socket(False)
+                        return data
 
-    def receive_retry(self,packet,length,verbose = False,connect = True):
+            except:
+                self.close_socket(False)
+                print "\b.",
+                self.connect(False)
+
+
+    def receive_retry(self,packet,length,verbose = False,connect = True, transmit = True):
         start_time = 0
         stop_time = 0
         if(connect):
@@ -360,7 +410,8 @@ class Fuelsensor_interface(object):
                 #self.print_modbus(str(packet))
 
                 #self.socket.send(packet)
-                self.send_batch(packet)
+                if(transmit):
+                    self.send_batch(packet)
                 
                 counter = 5 
                 data = ""
@@ -395,7 +446,7 @@ class Fuelsensor_interface(object):
                     self.close_socket()
                     self.connect()
 
-    def close_socket(self):
+    def close_socket(self, verbose = True):
         """ Try to close tcp/ip SOCKET with FuelSensor device"""
         #lets close socket
         self.socket.close()
