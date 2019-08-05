@@ -2,25 +2,18 @@ import sys
 from Fuelsensor_interface import Fuelsensor_interface
 from Fuelsensor_interface import Params
 
-fs = Fuelsensor_interface('192.168.1.101', 5000)
+if len(sys.argv) == 3:
+    fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
+else:
+    fs = Fuelsensor_interface('192.168.1.101', 5000)
 
 params = Params(fs)
 
 params.sdft_i_min.interface.connect()
-params.sdft_i_min.get_value()
-print params.sdft_i_min.value
+params.pulse_period.get_value()
+print "pulse_period: ", params.pulse_period.value
 
-params.sdft_i_min.set_value(200)
-print params.sdft_i_min.value
-
-params.sdft_n.get_value()
-params.sdft_k.get_value()
-params.sdft_k.set_value(49)
-params.sdft_peak.get_value()
-
-print "N:", params.sdft_n.value
-print "k:", params.sdft_k.value
-print "sdft paek: ", params.sdft_peak.value
 params.sdft_i_min.interface.close_socket()
 
 
+ 

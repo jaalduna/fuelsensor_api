@@ -3,8 +3,9 @@ from Fuelsensor_interface import Fuelsensor_interface
 import time
 import matplotlib.pyplot as plt
 import struct
+import pickle
 
-if len(sys.argv) == 5:
+if len(sys.argv) == 6:
     fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
 else:
     print "not enought parameters, using default"
@@ -38,6 +39,7 @@ for i in range(0,length/4):
     #     pass
     #     new_data = (0.5,1)
     data_norm.append(new_data[0])
+
 print len(data_norm)
 
 for i in range(1,len(data_norm)):
@@ -50,5 +52,5 @@ plt.ylabel('norm echo')
 plt.show()
 
 
-i_min = 250
-
+with open(str(sys.argv[5], 'w') as f:  # Python 3: open(..., 'wb')
+    pickle.dump([data_norm], f)  
