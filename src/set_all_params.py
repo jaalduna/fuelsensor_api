@@ -17,7 +17,7 @@ params.pga_gain.set_value(4)
 params.num_pulses.set_value(10)
 params.pulse_period.set_value(92)
 params.pulse_width.set_value(6)
-params.res_hv.set_value(40)
+#params.res_hv.set_value(40)
 params.sdft_min_peak_value_th.set_value(0.2)
 params.sdft_k.set_value(39)
 params.sdft_n.set_value(107)
@@ -30,7 +30,7 @@ params.sdft_sound_speed.set_value(1495)
 params.sdft_sample_rate.set_value(2981)
 params.sdft_n_samples_one_valid.set_value(20)
 params.skip_param.set_value(20000)
-fs.backup_params_to_flash()
+#fs.backup_params_to_flash()
 
 
 print "data_vector_type: ", params.data_vector_type.value

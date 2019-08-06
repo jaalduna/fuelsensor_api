@@ -325,7 +325,7 @@ class Fuelsensor_interface(object):
         """ get hight of liquid in meters."""    
         data = self.send_cmd_without_params(GET_HEIGHT, 8)
         height = struct.unpack('<f', data[4:8])[0]
-        print "height: " + str(height) + " [m]"
+        print  str(height)
         return height
 
     def get_temp(self):
@@ -407,8 +407,9 @@ class Fuelsensor_interface(object):
                 #print "success!"
                 return
             except:
-                #print "can't connect"
+                print "can't connect"
                 self.close_socket()
+                break
                 #return
 
     def receive_retry(self,packet,length,verbose = False,connect = True):

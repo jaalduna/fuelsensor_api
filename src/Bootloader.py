@@ -187,8 +187,8 @@ class Bootloader(object):
             except:
                 #print "can't connect"
                 self.close_socket()
-                break
-                #return
+                #break
+                return
 
     def receive_retry(self,packet,length,verbose = False,connect = True):
         start_time = 0

@@ -1,12 +1,32 @@
 import sys
+import json
+from Bootloader import Bootloader
 from Fuelsensor_interface import Fuelsensor_interface
 from Fuelsensor_interface import Params
+import time
 
-if len(sys.argv) == 3:
-    fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
-else:
-    fs = Fuelsensor_interface('192.168.100.187', 5000)
+#print sys.argv[1]
 
+y = json.loads(sys.argv[1])
+ip= y['ip']
+#port = y["port"]
+
+
+#print "ip: " + y["ip"]
+#print "port: " + str(y["port"])
+# #print "arg 2: " + sys.argv[2]
+
+b = Bootloader(ip,5000)
+fs = Fuelsensor_interface(ip,5000)
+
+#b.connect()
+# b.read_version()
+# b.connect()
+# #b.read_version()
+# b.jump_to_app()
+# #print "Jump to app"
+# b.close_socket()
+# time.sleep(3)
 params = Params(fs)
 
 params.sdft_i_min.interface.connect()
@@ -33,7 +53,7 @@ params.skip_param.get_value()
 
 print "data_vector_type: ", params.data_vector_type.value
 print "data_vector_offset: ", params.data_vector_offset.value
-print "pga_gain: ", params.pga_gain.value
+print "pga_gain: ", params.pga_gain.value ,""
 print "num_pulses: ", params.num_pulses.value
 print "pulse_period: ", params.pulse_period.value
 print "pulse_width: ", params.pulse_width.value
@@ -55,4 +75,4 @@ print "skip_param: ", params.skip_param.value
 params.sdft_i_min.interface.close_socket()
 
 
- 
+
