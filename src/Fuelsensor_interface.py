@@ -300,7 +300,7 @@ class Fuelsensor_interface(object):
         data = self.send_cmd_without_params(GET_ID, 12)
         node_id = data[4:-2]
         self.print_modbus(str(node_id))
-        return data
+        return node_id
 
     def get_app_version(self):
         data = self.send_cmd_without_params(GET_APP_VERSION,6)
@@ -310,7 +310,7 @@ class Fuelsensor_interface(object):
         self.print_modbus(str(mayor_version))
         minor_version = versions[1]
         print "App version: " + str(mayor_version) + "." + str(minor_version)
-        return
+        return versions
 
     def get_timestamp(self):
         data = self.send_cmd_without_params(GET_TIMESTAMP,11)
