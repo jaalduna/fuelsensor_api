@@ -8,21 +8,18 @@ import matplotlib.pyplot as plt
 import struct
 
 
+
 #print sys.argv[1]
 
 y = json.loads(sys.argv[1])
-ip = y['ip']
-length = y["length"]
-packet_size = y["packet_size"]
+#ip= y["ip"]
+length = int(y["length"])
+packet_size = int(y["packet_size"])
 
-#num_pulses=y["num_pulses"]
-#port = y["port"]
-
-
-print "ip: " + y["ip"]
-print "length" + int(y["length"])
-print "packet_size" + int(y["length"])
-# #print "arg 2: " + sys.argv[2]
+ip =str("192.168.100.187")
+# print "ip: " + y["ip"]
+# print "length: " + y["length"]
+# print "packet_size: " + y["packet_size"]
 
 b = Bootloader(ip,5000)
 fs = Fuelsensor_interface(ip,5000)
@@ -30,6 +27,7 @@ params = Params(fs)
 params.sdft_i_min.interface.connect()
 
 offset = 0
+
 data = fs.get_complete_norm_echo(length,packet_size)
 fs.print_modbus(str(data))
 
