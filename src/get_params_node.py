@@ -12,21 +12,14 @@ ip= y['ip']
 #port = y["port"]
 
 
-#print "ip: " + y["ip"]
+print "ip: " + y["ip"]
 #print "port: " + str(y["port"])
-# #print "arg 2: " + sys.argv[2]
+#print "arg 2: " + sys.argv[2]
 
 b = Bootloader(ip,5000)
 fs = Fuelsensor_interface(ip,5000)
 
-#b.connect()
-# b.read_version()
-# b.connect()
-# #b.read_version()
-# b.jump_to_app()
-# #print "Jump to app"
-# b.close_socket()
-# time.sleep(3)
+
 params = Params(fs)
 
 params.sdft_i_min.interface.connect()
