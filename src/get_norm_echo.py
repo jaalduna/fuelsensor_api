@@ -6,7 +6,7 @@ import struct
 import pickle
 import json 
 
-if len(sys.argv) == 6:
+if len(sys.argv) == 5:
     fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
 else:
     print "not enought parameters, using default"
