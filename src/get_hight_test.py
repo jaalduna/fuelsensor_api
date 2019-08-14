@@ -14,7 +14,7 @@ fs.get_height()
 fs.get_app_version()
 #fs.get_timestamp()
 #fs.set_timestamp(00,42,19,0,28,7,19)
-time.sleep(1)
+#time.sleep(1)
 #fs.get_timestamp()
 #for i in range(1,100):
 #    fs.get_imu_accel_var()
