@@ -139,9 +139,9 @@ class Fuelsensor_interface(object):
         self.TCP_IP = TCP_IP
         self.TCP_PORT = TCP_PORT 
         self.BUFFER_SIZE  = 2048
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.timeout =1
-        self.socket.settimeout(self.timeout)
+        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.timeout = 5
+        #self.socket.settimeout(self.timeout)
 
 
     def __del__(self):
@@ -305,9 +305,9 @@ class Fuelsensor_interface(object):
     def get_app_version(self):
         data = self.send_cmd_without_params(GET_APP_VERSION,6)
         versions = struct.unpack('<bb',data[4:6])
-        self.print_modbus(str(data))
+        #self.print_modbus(str(data))
         mayor_version = versions[0]
-        self.print_modbus(str(mayor_version))
+        #self.print_modbus(str(mayor_version))
         minor_version = versions[1]
         print "App version: " + str(mayor_version) + "." + str(minor_version)
         return versions
@@ -364,6 +364,7 @@ class Fuelsensor_interface(object):
             try:
                 if(verbose):
                     print "connecting...",
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.settimeout(self.timeout)
                 self.socket.connect((self.TCP_IP, self.TCP_PORT))
                 #self.socket.settimeout(None)
@@ -413,11 +414,11 @@ class Fuelsensor_interface(object):
                 if(transmit):
                     self.send_batch(packet)
                 
-                counter = 5 
+                #counter = 5 
                 data = ""
 
-                while(counter >0):
-                    counter -= 1
+                while(len(data) < length):
+                    #counter -= 1
                     data += self.socket.recv(self.BUFFER_SIZE)
                     
                     # if(verbose):
@@ -438,7 +439,7 @@ class Fuelsensor_interface(object):
 
                         return data
                 
-            except:
+            except socket.timeout:
                 #self.print_modbus(data)
                 print "no answer...",
                 
@@ -449,11 +450,12 @@ class Fuelsensor_interface(object):
     def close_socket(self, verbose = True):
         """ Try to close tcp/ip SOCKET with FuelSensor device"""
         #lets close socket
+        self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
-        time.sleep(0.1)
+        #time.sleep(0.1)
         #lets reasign socket so it can be opened again
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(self.timeout)
+        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket.settimeout(self.timeout)
         time.sleep(0.1)
 
     def print_modbus(self,res):

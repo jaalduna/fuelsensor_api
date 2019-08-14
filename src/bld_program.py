@@ -1,12 +1,12 @@
 from Bootloader import Bootloader
 import sys
-if len(sys.argv) == 4:
+if len(sys.argv) >= 3:
     b = Bootloader(str(sys.argv[1]), int(sys.argv[2]))
 else:
-    b = Bootloader()
+    b = Bootloader('192.168.100.187',5000)
 b.read_version()
 b.connect()
-if len(sys.argv) > 3:
+if len(sys.argv) == 4:
     b.program_file(str(sys.argv[3]))
 else:
     b.program_file('./firmware/aiko1.X.production.hex')
