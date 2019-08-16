@@ -4,6 +4,10 @@ from Bootloader import Bootloader
 from Fuelsensor_interface import Fuelsensor_interface
 from Fuelsensor_interface import Params
 import time
+import matplotlib.pyplot as plt
+import struct
+import pickle
+
 
 #print sys.argv[1]
 

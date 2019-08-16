@@ -9,6 +9,9 @@ import json
 
 y = json.loads(sys.argv[1])
 ip= y['ip']
+length=y["length"]
+packet_size=y["packet_size"]
+
 #port = y["port"]
 
 
@@ -22,10 +25,10 @@ fs.connect()
 print "backup_timeseries"
 fs.bk_timeseries()
 time.sleep(1)
-print "get norm echo"
+print "get norm sdft"
 offset = 0
-length = 5000
-packet_size = 50
+# length = 5000
+# packet_size = 50
 #data = fs.get_norm_echo(offset, length)
 data = fs.get_complete_sdft_echo(length,packet_size)
 fs.print_modbus(str(data))
@@ -49,20 +52,15 @@ for i in range(0,length/4):
 
 print len(data_norm)
 
-# for i in range(1,len(data_norm)):
-#     print data_norm[i]
+for i in range(1,len(data_norm)):
+    print data_norm[i]
 
-# plt.plot(data_norm)
-# plt.grid(True)
-# plt.title('Echo vs time')
-# plt.ylabel('norm echo')
-# plt.show()
+plt.plot(data_norm)
+plt.grid(True)
+plt.title('Echo vs time')
+plt.ylabel('norm echo')
+plt.show()
 
 
 # with open(str(sys.argv[5]), 'w') as f:  # Python 3: open(..., 'wb')
 #     pickle.dump([data_norm], f)  
-
-
-
-
-data = fs.get_complete_sdft_echo(length,packet_size)

@@ -9,6 +9,9 @@ import json
 
 y = json.loads(sys.argv[1])
 ip= y['ip']
+length=y["length"]
+packet_size=y["packet_size"]
+
 #port = y["port"]
 
 
@@ -24,8 +27,8 @@ fs.bk_timeseries()
 time.sleep(1)
 print "get norm echo"
 offset = 0
-length = int(5000)
-packet_size = int(50)
+# length = 5000
+# packet_size = 50
 #data = fs.get_norm_echo(offset, length)
 data = fs.get_complete_norm_echo(length,packet_size)
 fs.print_modbus(str(data))
