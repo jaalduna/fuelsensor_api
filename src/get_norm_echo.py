@@ -52,5 +52,5 @@ plt.ylabel('norm echo')
 plt.show()
 
 
-with open(str(sys.argv[5], 'w') as f:  # Python 3: open(..., 'wb')
+with open(str(sys.argv[5]), 'w') as f:  # Python 3: open(..., 'wb')
     pickle.dump([data_norm], f)  
