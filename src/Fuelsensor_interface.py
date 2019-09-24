@@ -254,14 +254,14 @@ class Fuelsensor_interface(object):
             while(True):
                 try:
                     partial_data = self.get_norm_echo((i-1)*packet_size,packet_size)
-                except:
-                    print "bad crc"
+                except Exception as e:
+                    print "norm_echo: ",e
                     partial_data = bytearray(0)
                 time.sleep(0.01)
                 if len(partial_data) == (4+packet_size+2): 
                     break;
             data +=partial_data[4:len(partial_data) - 2 ]
-            print len(data), "/", length  
+            print len(data), "/", length,"\r",  
         return data  
 
     def get_complete_sdft_echo(self, length,packet_size):
@@ -272,14 +272,14 @@ class Fuelsensor_interface(object):
             while(True):
                 try:
                         partial_data = self.get_sdft_echo((i-1)*packet_size,packet_size)
-                except:
-                        print "bad crc"
+                except Exception as e:
+                        print "sdft_echo: ",e
                         partial_data = bytearray(0)
                 time.sleep(0.01)
                 if len(partial_data) == (4+packet_size+2): 
                     break;
             data +=partial_data[4:len(partial_data) - 2 ]
-            print len(data), "/", length 
+            print len(data), "/", length,"\r",
         return data  
 
     def get_height(self):
@@ -371,9 +371,9 @@ class Fuelsensor_interface(object):
                 if(verbose):
                     print "success!"
                 return
-            except:
+            except Exception as e:
                 if(verbose):
-                    print "can't connect"
+                    print "connect: ",e
                 self.close_socket()
                 #return
     def receive_periodic(self,length):
@@ -439,9 +439,9 @@ class Fuelsensor_interface(object):
 
                         return data
                 
-            except socket.timeout:
+            except Exception as e:
                 #self.print_modbus(data)
-                print "no answer...",
+                print "receive_retry: ",e
                 
                 if(True):
                     self.close_socket()
@@ -450,7 +450,7 @@ class Fuelsensor_interface(object):
     def close_socket(self, verbose = True):
         """ Try to close tcp/ip SOCKET with FuelSensor device"""
         #lets close socket
-        self.socket.shutdown(socket.SHUT_RDWR)
+        #self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
         #time.sleep(0.1)
         #lets reasign socket so it can be opened again

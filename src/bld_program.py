@@ -9,6 +9,7 @@ b.connect()
 if len(sys.argv) == 4:
     b.program_file(str(sys.argv[3]))
 else:
+    print "programming default .hex file"
     b.program_file('./firmware/aiko1.X.production.hex')
     
 b.close_socket()

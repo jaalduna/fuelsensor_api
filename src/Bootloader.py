@@ -203,7 +203,7 @@ class Bootloader(object):
                 #self.print_modbus(str(packet))
 
                 self.socket.send(packet)
-                time.sleep(0.6) 
+                time.sleep(0.1) 
                 counter = 5 
                 data = ""
                 if(length > 0):

@@ -7,11 +7,11 @@ else:
     fs = Fuelsensor_interface('192.168.100.187',5000)
 #print "conectando"
 fs.connect()
+fs.get_app_version()
 #print "solicitando altura"
 fs.get_height()
 #fs.get_temp()
 #fs.get_id()
-fs.get_app_version()
 #fs.get_timestamp()
 #fs.set_timestamp(00,42,19,0,28,7,19)
 #time.sleep(1)
