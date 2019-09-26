@@ -11,6 +11,7 @@ else:
     print "not enought parameters, using default"
     fs = Fuelsensor_interface()
 #print "conectando"
+fs.use_serial()
 fs.connect()
 print "backup_timeseries"
 fs.bk_timeseries()

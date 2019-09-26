@@ -2,6 +2,8 @@ import struct
 import crcmod
 import socket
 import time
+import serial
+
 #import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
 
@@ -139,13 +141,18 @@ class Fuelsensor_interface(object):
         self.TCP_IP = TCP_IP
         self.TCP_PORT = TCP_PORT 
         self.BUFFER_SIZE  = 2048
-        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.timeout = 5
-        #self.socket.settimeout(self.timeout)
+        self.SERIAL_PORT = None
 
 
     def __del__(self):
-        self.socket.close()
+        if(self.SERIAL_PORT):
+            self.ser.close()
+        else:
+            self.socket.close()
+
+    def use_serial(self, SERIAL_PORT='COM5'):
+        self.SERIAL_PORT = SERIAL_PORT
 
     def send_cmd(self, cmd, params,rx_len,verbose=False):
         """ send a cmd to the device """
@@ -174,7 +181,9 @@ class Fuelsensor_interface(object):
                 if(len(data) >= rx_len + 2):
                     data = data[0:rx_len + 2] #chunk garbage bytes
                     crc = str(data[len(data) - 2:])
-                    calculated_crc = struct.pack('>H', crc16(str(data[4:len(data)- 2])))
+                    aux = crc16(str(data[4:len(data)- 2]))
+                    calculated_crc = struct.pack('>H', aux)
+                    #print "crc: ",aux
                     if(verbose):
                         self.print_modbus(str(data))
                     if crc == calculated_crc:
@@ -193,6 +202,7 @@ class Fuelsensor_interface(object):
                 self.send_batch(packet)
                 return
         return data
+
     def get_periodic_report(self, rx_len,log,verbose= False):
         while(True):
             data = self.receive_periodic(rx_len)
@@ -364,19 +374,23 @@ class Fuelsensor_interface(object):
             try:
                 if(verbose):
                     print "connecting...",
-                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.socket.settimeout(self.timeout)
-                self.socket.connect((self.TCP_IP, self.TCP_PORT))
-                #self.socket.settimeout(None)
+                if(self.SERIAL_PORT):
+                    self.ser = serial.Serial(self.SERIAL_PORT, 115200, timeout=self.timeout)
+                else:
+                    self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.socket.settimeout(self.timeout)
+                    self.socket.connect((self.TCP_IP, self.TCP_PORT))
+                    #self.socket.settimeout(None)
                 if(verbose):
                     print "success!"
                 return
             except Exception as e:
                 if(verbose):
-                    print "connect: ",e
+                    print "connect: ",type(e),e
                 self.close_socket()
                 #return
     def receive_periodic(self,length):
+        """Support for serial communication not yet implemented"""
         self.connect(False)
         print "waiting for report-> ", 
         data = ""
@@ -406,7 +420,7 @@ class Fuelsensor_interface(object):
             try:
                 if(verbose):
                     print "sending: ",
-                    #self.print_modbus(str(packet))
+                    self.print_modbus(str(packet))
                 start_time = (time.time()*1000)
                 #self.print_modbus(str(packet))
 
@@ -419,7 +433,10 @@ class Fuelsensor_interface(object):
 
                 while(len(data) < length):
                     #counter -= 1
-                    data += self.socket.recv(self.BUFFER_SIZE)
+                    if(self.SERIAL_PORT):
+                        data += self.ser.read() #read one byte at a time
+                    else:
+                        data += self.socket.recv(self.BUFFER_SIZE)
                     
                     # if(verbose):
                     #     print data
@@ -433,8 +450,7 @@ class Fuelsensor_interface(object):
                             print "time elapsed: ",
                             print str(stop_time - start_time)
                             print "data received ok: ",
-                            if(verbose):
-                                self.print_modbus(data)
+                            self.print_modbus(data)
 
 
                         return data
@@ -451,7 +467,11 @@ class Fuelsensor_interface(object):
         """ Try to close tcp/ip SOCKET with FuelSensor device"""
         #lets close socket
         #self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
+        if(self.SERIAL_PORT):
+            if(self.ser.is_open):
+                self.ser.close()
+        else:
+            self.socket.close()
         #time.sleep(0.1)
         #lets reasign socket so it can be opened again
         #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -519,8 +539,11 @@ class Fuelsensor_interface(object):
     def send_batch(self,packet):
         packet_size = 4 
         for i in range(len(packet)/packet_size):
-            self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
-            time.sleep(0.05)  
+            if(self.SERIAL_PORT):
+                self.ser.write(packet[i*packet_size:i*packet_size+packet_size])
+            else:
+                self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
+            time.sleep(0.05)             
 
     def get_reg(self):
         """ returns last unread log regsiter as raw_log. If there is no registers it returns 0.
@@ -535,8 +558,11 @@ class Fuelsensor_interface(object):
         Cada registro debe contar con un ID, para determinar si la funcion increment_reg()
 
          """
-    def send_raw_byte(self,byte):
-        self.socket.send(bytearray(byte))
+    def send_raw_byte(self,byte,serial=False):
+        if(serial):
+            self.ser.write(bytearray(byte))
+        else:
+            self.socket.send(bytearray(byte))
 
 
 class Log(object):
