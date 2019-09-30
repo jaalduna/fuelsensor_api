@@ -18,7 +18,12 @@ GET_PARAM = 7
 SET_PARAM = 8
 RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
 BACKUP_PARAMS_TO_FLASH = 10
-
+GET_APP_VERSION = 11
+GET_TEMP = 12
+GET_ID = 13
+GET_TIMESTAMP = 14
+SET_TIMESTAMP = 15
+GET_IMU_ACCEL_VAR = 16
 
 #TODO: create a list of PARAMS constants using fields "PARAM_ID" and "nombre" from
 # the table "lista de parametros" located at
@@ -122,15 +127,21 @@ class Fuelsensor_interface(object):
     SET_PARAM = 8
     RESTORE_DEFAULT_PARAMS_TO_FLASH = 9
     BACKUP_PARAMS_TO_FLASH = 10
+    GET_APP_VERSION = 11
+    GET_TEMP = 12
+    GET_ID = 13
+    GET_TIMESTAMP = 14
+    SET_TIMESTAMP = 15
+    GET_IMU_ACCEL_VAR = 16
 
     def __init__(self,TCP_IP='192.168.0.10',TCP_PORT=5000):
         super(Fuelsensor_interface, self).__init__()
         self.TCP_IP = TCP_IP
         self.TCP_PORT = TCP_PORT 
         self.BUFFER_SIZE  = 2048
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.timeout =1
-        self.socket.settimeout(self.timeout)
+        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.timeout = 5
+        #self.socket.settimeout(self.timeout)
 
 
     def __del__(self):
@@ -169,6 +180,7 @@ class Fuelsensor_interface(object):
                     if crc == calculated_crc:
                         break
                     else:
+                        self.close_socket()
                         raise Exception("bad crc")
                 else:
                     # print len(data)
@@ -181,6 +193,32 @@ class Fuelsensor_interface(object):
                 self.send_batch(packet)
                 return
         return data
+    def get_periodic_report(self, rx_len,log,verbose= False):
+        while(True):
+            data = self.receive_periodic(rx_len)
+            if(len(data) >= rx_len + 2):
+                data = data[0:rx_len + 2] #chunk garbage bytes
+                crc = str(data[len(data) - 2:])
+                calculated_crc = struct.pack('>H', crc16(str(data[4:len(data)- 2])))
+                if(verbose):
+                    self.print_modbus(str(data))
+                if crc == calculated_crc:
+                    break
+                else:
+                    self.close_socket()
+                    log.warning("bad crc")
+                    raise Exception("bad crc")
+
+            else:   
+                # print len(data)
+                #self.print_modbus(data)
+                log.warning("not enought rx bytes")
+                raise Exception("not enougth rx bytes")
+                break
+
+        height = struct.unpack('<f', data[4:8])[0]
+        print "height: " + str(height) + " [m]"
+        return height
 
     def bk_timeseries(self):
         """ backup timeseries on node. 
@@ -216,14 +254,14 @@ class Fuelsensor_interface(object):
             while(True):
                 try:
                     partial_data = self.get_norm_echo((i-1)*packet_size,packet_size)
-                except:
-                    print "bad crc"
+                except Exception as e:
+                    print "norm_echo: ",e
                     partial_data = bytearray(0)
                 time.sleep(0.01)
                 if len(partial_data) == (4+packet_size+2): 
                     break;
             data +=partial_data[4:len(partial_data) - 2 ]
-            print len(data), "/", length  
+            print len(data), "/", length,"\r",  
         return data  
 
     def get_complete_sdft_echo(self, length,packet_size):
@@ -234,28 +272,65 @@ class Fuelsensor_interface(object):
             while(True):
                 try:
                         partial_data = self.get_sdft_echo((i-1)*packet_size,packet_size)
-                except:
-                        print "bad crc"
+                except Exception as e:
+                        print "sdft_echo: ",e
                         partial_data = bytearray(0)
                 time.sleep(0.01)
                 if len(partial_data) == (4+packet_size+2): 
                     break;
             data +=partial_data[4:len(partial_data) - 2 ]
-            print len(data), "/", length 
+            print len(data), "/", length,"\r",
         return data  
 
     def get_height(self):
         """ get hight of liquid in meters."""    
         data = self.send_cmd_without_params(GET_HEIGHT, 8)
-
         height = struct.unpack('<f', data[4:8])[0]
         print "height: " + str(height) + " [m]"
         return height
 
+
+    def get_temp(self):
+        data = self.send_cmd_without_params(GET_TEMP, 8)
+        temp = struct.unpack('<f', data[4:8])[0]
+        print "temp: " + str(temp) + " [C]"
+        return temp
+
+    def get_id(self):
+        data = self.send_cmd_without_params(GET_ID, 12)
+        node_id = data[4:-2]
+        self.print_modbus(str(node_id))
+        return node_id
+
+    def get_app_version(self):
+        data = self.send_cmd_without_params(GET_APP_VERSION,6)
+        versions = struct.unpack('<bb',data[4:6])
+        #self.print_modbus(str(data))
+        mayor_version = versions[0]
+        #self.print_modbus(str(mayor_version))
+        minor_version = versions[1]
+        print "App version: " + str(mayor_version) + "." + str(minor_version)
+        return versions
+
+    def get_timestamp(self):
+        data = self.send_cmd_without_params(GET_TIMESTAMP,11)
+        self.print_modbus(str(data))
+        return
+
+    def set_timestamp(self,sec,minutes,hour,wday,date,month, year):
+        params = bytearray([sec,minutes, hour, wday, date, month, year,0])
+        data = self.send_cmd(SET_TIMESTAMP, params,4,False)
+        self.print_modbus(str(data))
+        return
+
+    def get_imu_accel_var(self):
+        data = self.send_cmd_without_params(GET_IMU_ACCEL_VAR, 8)
+        result = struct.unpack('<f', data[4:8])[0]
+        print "imu accel var: " + str(result)
+
     def get_pos(self):
         """ get variable pos, an int value proportional to hight"""
         data = self.send_cmd_without_params(GET_POS, 8)
-        self.print_modbus(data)
         pos = struct.unpack('<f', data[4:8])[0]
         print "pos: " + str(pos) + " [samples]" 
         return pos   
@@ -283,22 +358,46 @@ class Fuelsensor_interface(object):
         # print(":".join("{:02x}".format(ord(c)) for c in str(packet)))
 
 
-    def connect(self):
+    def connect(self,verbose=True):
         """ Try to stablish a tcp/ip connection with fuelSensor device"""
         while True:
             try:
-                print "connecting...",
+                if(verbose):
+                    print "connecting...",
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.settimeout(self.timeout)
                 self.socket.connect((self.TCP_IP, self.TCP_PORT))
                 #self.socket.settimeout(None)
-                print "success!"
+                if(verbose):
+                    print "success!"
                 return
-            except:
-                print "can't connect"
+            except Exception as e:
+                if(verbose):
+                    print "connect: ",e
                 self.close_socket()
                 #return
+    def receive_periodic(self,length):
+        self.connect(False)
+        print "waiting for report-> ", 
+        data = ""
+        while(True):
+            try:
+                counter = 5
+                while(counter >0):
+                    counter -=1
+                    data += self.socket.recv(self.BUFFER_SIZE)
+                    if(len(data) >= length):
+                        print "pkg received!"
+                        self.close_socket(False)
+                        return data
 
-    def receive_retry(self,packet,length,verbose = False,connect = True):
+            except:
+                self.close_socket(False)
+                print "\b.",
+                self.connect(False)
+
+
+    def receive_retry(self,packet,length,verbose = False,connect = True, transmit = True):
         start_time = 0
         stop_time = 0
         if(connect):
@@ -312,13 +411,14 @@ class Fuelsensor_interface(object):
                 #self.print_modbus(str(packet))
 
                 #self.socket.send(packet)
-                self.send_batch(packet)
+                if(transmit):
+                    self.send_batch(packet)
                 
-                counter = 5 
+                #counter = 5 
                 data = ""
 
-                while(counter >0):
-                    counter -= 1
+                while(len(data) < length):
+                    #counter -= 1
                     data += self.socket.recv(self.BUFFER_SIZE)
                     
                     # if(verbose):
@@ -339,22 +439,23 @@ class Fuelsensor_interface(object):
 
                         return data
                 
-            except:
+            except Exception as e:
                 #self.print_modbus(data)
-                print "no answer...",
+                print "receive_retry: ",e
                 
                 if(True):
                     self.close_socket()
                     self.connect()
 
-    def close_socket(self):
+    def close_socket(self, verbose = True):
         """ Try to close tcp/ip SOCKET with FuelSensor device"""
         #lets close socket
+        #self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
-        time.sleep(0.1)
+        #time.sleep(0.1)
         #lets reasign socket so it can be opened again
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(self.timeout)
+        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket.settimeout(self.timeout)
         time.sleep(0.1)
 
     def print_modbus(self,res):
@@ -396,7 +497,6 @@ class Fuelsensor_interface(object):
         #update param on the remote node
         response = self.send_cmd(SET_PARAM, param_field, num_bytes_response +4) #+4 is for header size
         #update param on the local representation of the node
-        self.print_modbus(response)
         return response
 
     def set_param_byte(self, param_id,value):
@@ -412,6 +512,9 @@ class Fuelsensor_interface(object):
         value_field =  struct.pack('<f',value)
         response = self.set_param(param_id, 4, value_field)  
         return response
+
+    def backup_params_to_flash(self):
+        response = self.send_cmd_without_params(BACKUP_PARAMS_TO_FLASH,4)
 
     def send_batch(self,packet):
         packet_size = 4 

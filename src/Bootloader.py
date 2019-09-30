@@ -2,6 +2,7 @@ import struct
 import crcmod
 import socket
 import time
+
 #AN1388 Microchip bootloader implementation
 
 #constants declaration
@@ -58,10 +59,14 @@ class Bootloader(object):
         packet += struct.pack("<H", crc16(str(packet[1:len(packet)]))) # calculate CRC discarding SOH
         packet.append(EOT)
         packet = self.encode(packet)
-        response = self.receive_retry(packet,response_len,False, connect)
-        response = self.decode(response)
+        attempts = 3
+        while(attempts >0):
+            response = self.receive_retry(packet,response_len,False, connect)
+            response = self.decode(response)
+            if(response !=0):
+                break;
 
-        self.print_modbus(str(response))
+        #self.print_modbus(str(response))
         if(self.check_crc(response)):
             pass
             #print "crc ok"
@@ -186,7 +191,7 @@ class Bootloader(object):
     def receive_retry(self,packet,length,verbose = False,connect = True):
         start_time = 0
         stop_time = 0
-        print connect
+        #print connect
         if(connect):
             self.connect()
         while True:
@@ -198,7 +203,7 @@ class Bootloader(object):
                 #self.print_modbus(str(packet))
 
                 self.socket.send(packet)
-                time.sleep(0.6) 
+                time.sleep(0.1) 
                 counter = 5 
                 data = ""
                 if(length > 0):

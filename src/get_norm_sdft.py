@@ -3,23 +3,24 @@ from Fuelsensor_interface import Fuelsensor_interface
 import time
 import matplotlib.pyplot as plt
 import struct
+import pickle
 
 if len(sys.argv) == 5:
     fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
 else:
     fs = Fuelsensor_interface()
-print "conectando"
+#print "conectando"
 fs.connect()
 print "backup_timeseries"
 fs.bk_timeseries()
 time.sleep(1)
-print "get norm echo"
+print "get norm sdft"
 offset = 0
 length = int(sys.argv[3])
 packet_size = int(sys.argv[4])
 #data = fs.get_norm_echo(offset, length)
 data = fs.get_complete_sdft_echo(length,packet_size)
-fs.print_modbus(str(data))
+#fs.print_modbus(str(data))
 
 
 
@@ -36,13 +37,17 @@ for i in range(0,length/4):
     #     pass
     #     new_data = (0.5,1)
     data_norm.append(new_data[0])
-print len(data_norm)
+#print len(data_norm)
 
-for i in range(1,len(data_norm)):
-    print data_norm[i]
+#for i in range(1,len(data_norm)):
+#    print data_norm[i]
 
 plt.plot(data_norm)
 plt.grid(True)
-plt.title('Echo vs time')
-plt.ylabel('norm echo')
+plt.title('sdft vs time')
+plt.ylabel('norm sdft')
 plt.show()
+
+
+with open('noise_raw_data', 'w') as f:  # Python 3: open(..., 'wb')
+    pickle.dump([data_norm], f) 
