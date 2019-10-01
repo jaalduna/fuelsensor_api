@@ -15,13 +15,13 @@ try:
     #print "data_vector_type: ", params.data_vector_type.value
 	#params.data_vector_offset.set_value(0)
     #print "data_vector_offset: ", params.data_vector_offset.value
-    params.pga_gain.set_value(1)
+    #params.pga_gain.set_value(2)
     print "pga_gain: ", params.pga_gain.value
-    params.num_pulses.set_value(4)
+    #params.num_pulses.set_value(10)
     print "num_pulses: ", params.num_pulses.value
-    params.pulse_period.set_value(87)
+    #params.pulse_period.set_value(100)
     print "pulse_period: ", params.pulse_period.value
-    params.pulse_width.set_value(40)
+    params.pulse_width.set_value(20)
     print "pulse_width: ", params.pulse_width.value
 	#params.res_hv.set_value(40)
     print "res_hv: ", params.res_hv.value
