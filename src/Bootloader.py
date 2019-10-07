@@ -124,6 +124,13 @@ class Bootloader(object):
         self.socket.send(packet)
         # response = self.receive_retry(packet,0,False)
 
+    def jump_to_bld(self):
+        """Jump to bootloader from bld_app."""
+        print "jumping to bld"
+        packet = bytearray()
+        packet.append('b')
+        self.socket.send(packet)
+
     def check_crc(self, msg):
         calculated_crc = bytearray()
         calculated_crc += struct.pack("<H", crc16(str(msg[0:len(msg)- 2])))

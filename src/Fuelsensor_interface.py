@@ -336,7 +336,29 @@ class Fuelsensor_interface(object):
         return pos   
     def reset(self):
         """ reset fuelsensor and enter into Bootloader mode"""
-        self.send_cmd_without_params(RESET, 0)
+        while 1:
+            try:
+                print 'reseting... ',
+                self.send_cmd_without_params(RESET, 0)
+                data = ''
+                while len(data) < 12:
+                    data += self.socket.recv(self.BUFFER_SIZE)
+                    if(len(data) >= 12):
+                        if(data == 'bootloader\n\r'):
+                            print 'done!'
+                            return
+                        else:
+                            print 'unknown response: ',data
+            except Exception as e:
+                print e
+        #self.send_raw_byte(0xFF)
+
+    def jump_to_bld(self):
+        """Jump to bootloader from bld_app."""
+        print "jumping to bootloader"
+        packet = bytearray()
+        packet.append('b')
+        self.socket.send(packet)
 
     def send_cmd_without_params(self, name, num_bytes):
         """ send command name, filling params with 4 zeros"""
