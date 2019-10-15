@@ -24,14 +24,15 @@ GET_ID = 13
 GET_TIMESTAMP = 14
 SET_TIMESTAMP = 15
 GET_IMU_ACCEL_VAR = 16
+GET_RESET_REASON = 17
 
 #TODO: create a list of PARAMS constants using fields "PARAM_ID" and "nombre" from
 # the table "lista de parametros" located at
 #https://fuelsensor.readthedocs.io/en/latest/low_level_interface.html
 
 
-
 crc16 = crcmod.predefined.mkPredefinedCrcFun("xmodem")
+
 
 class Param(object):
     """ Param Class """
@@ -133,6 +134,17 @@ class Fuelsensor_interface(object):
     GET_TIMESTAMP = 14
     SET_TIMESTAMP = 15
     GET_IMU_ACCEL_VAR = 16
+
+    #RESET_REASON definition from PIC32 config
+    RESET_REASON_NONE = 0x00000000
+    RESET_REASON_POWERON = 0x00000003
+    RESET_REASON_BROWNOUT = 0x00000002
+    RESET_REASON_WDT_TIMEOUT = 0x00000010
+    RESET_REASON_DMT_TIMEOUT = 0x00000020
+    RESET_REASON_SOFTWARE = 0x00000040
+    RESET_REASON_MCLR = 0x00000080
+    RESET_REASON_CONFIG_MISMATCH = 0x00000200
+    RESET_REASON_ALL = 0x000002F3
 
     def __init__(self,TCP_IP='192.168.0.10',TCP_PORT=5000):
         super(Fuelsensor_interface, self).__init__()
@@ -289,6 +301,13 @@ class Fuelsensor_interface(object):
         print "height: " + str(height) + " [m]"
         return height
 
+    def get_reset_reason(self):
+        """ get the last reset reason according to RESET_REASON definition"""
+        data = self.send_cmd_without_params(GET_RESET_REASON, 8)
+        reason = struct.unpack('<I', data[4:8])[0]
+        self.print_modbus(data)
+        print '0x{0:08X}'.format(reason)
+        return reason
 
     def get_temp(self):
         data = self.send_cmd_without_params(GET_TEMP, 8)
