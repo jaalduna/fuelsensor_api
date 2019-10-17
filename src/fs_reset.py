@@ -8,6 +8,7 @@ if len(sys.argv) == 3:
 else:
     fs = Fuelsensor_interface('192.168.100.187',5000)
     b = Bootloader('192.168.100.187',5000)
+fs.use_serial()
 fs.connect()
 fs.reset()
 time.sleep(0.2)

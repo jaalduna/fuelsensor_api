@@ -371,7 +371,7 @@ class Fuelsensor_interface(object):
                 self.send_cmd_without_params(RESET, 0)
                 data = ''
                 while len(data) < 12:
-                    data += self.socket.recv(self.BUFFER_SIZE)
+                    data += self.receive()
                     if(len(data) >= 12):
                         if(data == 'bootloader\n\r'):
                             print 'done!'
@@ -387,7 +387,7 @@ class Fuelsensor_interface(object):
         print "jumping to bootloader"
         packet = bytearray()
         packet.append('b')
-        self.socket.send(packet)
+        self.send_raw_byte(packet)
 
     def send_cmd_without_params(self, name, num_bytes):
         """ send command name, filling params with 4 zeros"""
@@ -586,7 +586,7 @@ class Fuelsensor_interface(object):
 
          """
     def send_raw_byte(self,byte,serial=False):
-        if(serial):
+        if(self.SERIAL_PORT):
             self.ser.write(bytearray(byte))
         else:
             self.socket.send(bytearray(byte))

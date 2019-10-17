@@ -5,6 +5,7 @@ if len(sys.argv) == 3:
 else:
     b = Bootloader('192.168.100.187',5000)
 #b.read_version()
+b.use_serial()
 b.connect()
 b.jump_to_app()
 #print "Jump to app"

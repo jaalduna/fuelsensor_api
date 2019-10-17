@@ -5,12 +5,13 @@ if len(sys.argv) == 2:
 else:
     fs = Fuelsensor_interface('192.168.0.100',5000)
 
+fs.use_serial('COM5')
 while True:
 	try:
 		fs.connect()
-		data = fs.socket.recv(1024)
+		data = fs.receive()
 		fs.print_modbus(data)
 	except Exception as e:
-		print e
+		print "Exception: ",e
 	finally:
 		fs.close_socket()
