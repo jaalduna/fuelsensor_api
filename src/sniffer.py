@@ -1,6 +1,9 @@
 from Fuelsensor_interface import Fuelsensor_interface
-
-fs = Fuelsensor_interface('172.19.6.187',5000)
+import sys
+if len(sys.argv) == 2:
+    fs = Fuelsensor_interface(str(sys.argv[1]), 5000)
+else:
+    fs = Fuelsensor_interface('192.168.0.100',5000)
 
 while True:
 	try:
