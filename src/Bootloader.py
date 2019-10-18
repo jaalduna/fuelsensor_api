@@ -2,6 +2,7 @@ import struct
 import crcmod
 import socket
 import time
+import serial
 
 #AN1388 Microchip bootloader implementation
 
@@ -32,10 +33,16 @@ class Bootloader(object):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.timeout = timeout
         self.socket.settimeout(self.timeout)
+        self.SERIAL_PORT = None
 
     def __del__(self):
-        self.socket.close()
+        if(self.SERIAL_PORT):
+            self.ser.close()
+        else:
+            self.socket.close()
 
+    def use_serial(self, SERIAL_PORT='COM5'):
+        self.SERIAL_PORT = SERIAL_PORT
 
     def read_version(self):
         """ Return bootloader firmware version from FuelSensor device.
@@ -61,7 +68,7 @@ class Bootloader(object):
         packet = self.encode(packet)
         attempts = 3
         while(attempts >0):
-            response = self.receive_retry(packet,response_len,False, connect)
+            response = self.receive_retry(packet,response_len,True, connect)
             response = self.decode(response)
             if(response !=0):
                 break;
@@ -121,8 +128,15 @@ class Bootloader(object):
         packet += struct.pack("<H", crc16(str(packet[1:len(packet)]))) # calculate CRC discarding SOH
         packet.append(EOT)
         packet = self.encode(packet)
-        self.socket.send(packet)
+        self.send_batch(packet)
         # response = self.receive_retry(packet,0,False)
+
+    def jump_to_bld(self):
+        """Jump to bootloader from bld_app."""
+        print "jumping to bld"
+        packet = bytearray()
+        packet.append('b')
+        self.send_raw_byte(packet)
 
     def check_crc(self, msg):
         calculated_crc = bytearray()
@@ -173,18 +187,26 @@ class Bootloader(object):
                 result.append(x)
         return result
 
-    def connect(self):
+    def connect(self, verbose=True):
         """Try to stablish a tcp/ip socket with FuelSensor device. """
         while True:
             try:
-                print "connecting...",
-                self.socket.settimeout(self.timeout)
-                self.socket.connect((self.TCP_IP, self.TCP_PORT))
-                #self.socket.settimeout(None)
-                print "success!"
+                if(verbose):
+                    print "connecting...",
+                if(self.SERIAL_PORT):
+                    self.ser = serial.Serial(self.SERIAL_PORT, 115200, timeout=self.timeout)
+
+                else:
+                    self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.socket.settimeout(self.timeout)
+                    self.socket.connect((self.TCP_IP, self.TCP_PORT))
+                    #self.socket.settimeout(None)
+                if(verbose):
+                    print "success!"
                 return
-            except:
-                print "can't connect"
+            except Exception as e:
+                if(verbose):
+                    print "connect: ",e
                 self.close_socket()
                 #return
 
@@ -202,14 +224,14 @@ class Bootloader(object):
                 start_time = (time.time()*1000)
                 #self.print_modbus(str(packet))
 
-                self.socket.send(packet)
+                self.send_batch(packet)
                 time.sleep(0.1) 
                 counter = 5 
                 data = ""
                 if(length > 0):
                     while(counter >0):
                         counter -= 1
-                        data += self.socket.recv(self.BUFFER_SIZE)
+                        data += self.receive()
                         
                         # if(verbose):
                         #     print data
@@ -228,9 +250,9 @@ class Bootloader(object):
                 else:
                     return 0
                 
-            except:
+            except Exception as e:
                 
-                print "no answer...",
+                print "receive_retry: ",e
                 
                 if(True):
                     self.close_socket()
@@ -239,11 +261,12 @@ class Bootloader(object):
     def close_socket(self):
         """ Try to close socket connection."""
         #lets close socket
-        self.socket.close()
-        time.sleep(0.1)
-        #lets reasign socket so it can be opened again
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(self.timeout)
+        if(self.SERIAL_PORT):
+            if(self.ser.is_open):
+                self.ser.close()
+        else:
+            self.socket.close()
+
         time.sleep(0.1)
 
     def print_modbus(self,res):
@@ -343,6 +366,27 @@ class Bootloader(object):
                 break
     def enter_bootloader(self):
         response = self.socket.send(bytearray(1))
+
+    def send_raw_byte(self,byte,serial=False):
+        if(serial):
+            self.ser.write(bytearray(byte))
+        else:
+            self.socket.send(bytearray(byte))
+    def send_batch(self,packet) :
+        packet_size = 4 
+        for i in range(len(packet)/packet_size):
+            if(self.SERIAL_PORT):
+                self.ser.write(packet[i*packet_size:i*packet_size+packet_size])
+            else:
+                self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
+            time.sleep(0.05)
+
+    def receive(self):
+        if(self.SERIAL_PORT):
+            data = self.ser.read()
+        else:
+            data = self.socket.recv(self.BUFFER_SIZE)
+        return data
 # b = Bootloader()
 # b.read_version()
 # b.connect()

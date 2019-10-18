@@ -6,29 +6,28 @@ import struct
 import pickle
 
 if len(sys.argv) == 6:
-    fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
+    ip = str(sys.argv[1])
+    port = int(sys.argv[2])
+    length = int(sys.argv[3])
+    packet_size = int(sys.argv[4])
+    data_file = str(sys.argv[5])
 else:
     print "not enought parameters, using default"
-    fs = Fuelsensor_interface()
-#print "conectando"
+    ip = '192.168.100.187'
+    port = 5000
+    length = 10000
+    packet_size = 50
+    data_file = 'data'
+
+fs = Fuelsensor_interface(ip,port)
+fs.use_serial()
 fs.connect()
 print "backup_timeseries"
 fs.bk_timeseries()
 time.sleep(1)
-print "get norm echo"
-#offset = 0
-length = int(sys.argv[3])
-packet_size = int(sys.argv[4])
-#data = fs.get_norm_echo(offset, length)
+print "get_complete_norm_echo"
 data = fs.get_complete_norm_echo(length,packet_size)
-#fs.print_modbus(str(data))
-
-
-
-#fs.backup_timeseries() # ver porque se pega la respuesta aqui, ver que hay en la interfaz serial o bien debugear el codigo, programando con el pickit 2.
-#fs.get_pos()
 fs.close_socket()
-
 
 data_norm = []
 for i in range(0,length/4):
@@ -51,6 +50,5 @@ plt.title('Echo vs time')
 plt.ylabel('norm echo')
 plt.show()
 
-
-with open(str(sys.argv[5]), 'w') as f:  # Python 3: open(..., 'wb')
+with open(data_file, 'w') as f:  # Python 3: open(..., 'wb')
     pickle.dump([data_norm], f)  

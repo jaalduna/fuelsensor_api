@@ -2,6 +2,8 @@ import struct
 import crcmod
 import socket
 import time
+import serial
+
 #import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
 
@@ -24,14 +26,15 @@ GET_ID = 13
 GET_TIMESTAMP = 14
 SET_TIMESTAMP = 15
 GET_IMU_ACCEL_VAR = 16
+GET_RESET_REASON = 17
 
 #TODO: create a list of PARAMS constants using fields "PARAM_ID" and "nombre" from
 # the table "lista de parametros" located at
 #https://fuelsensor.readthedocs.io/en/latest/low_level_interface.html
 
 
-
 crc16 = crcmod.predefined.mkPredefinedCrcFun("xmodem")
+
 
 class Param(object):
     """ Param Class """
@@ -134,18 +137,34 @@ class Fuelsensor_interface(object):
     SET_TIMESTAMP = 15
     GET_IMU_ACCEL_VAR = 16
 
+    #RESET_REASON definition from PIC32 config
+    RESET_REASON_NONE = 0x00000000
+    RESET_REASON_POWERON = 0x00000003
+    RESET_REASON_BROWNOUT = 0x00000002
+    RESET_REASON_WDT_TIMEOUT = 0x00000010
+    RESET_REASON_DMT_TIMEOUT = 0x00000020
+    RESET_REASON_SOFTWARE = 0x00000040
+    RESET_REASON_MCLR = 0x00000080
+    RESET_REASON_CONFIG_MISMATCH = 0x00000200
+    RESET_REASON_ALL = 0x000002F3
+
     def __init__(self,TCP_IP='192.168.0.10',TCP_PORT=5000):
         super(Fuelsensor_interface, self).__init__()
         self.TCP_IP = TCP_IP
         self.TCP_PORT = TCP_PORT 
         self.BUFFER_SIZE  = 2048
-        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.timeout = 5
-        #self.socket.settimeout(self.timeout)
+        self.SERIAL_PORT = None
 
 
     def __del__(self):
-        self.socket.close()
+        if(self.SERIAL_PORT):
+            self.ser.close()
+        else:
+            self.socket.close()
+
+    def use_serial(self, SERIAL_PORT='COM5'):
+        self.SERIAL_PORT = SERIAL_PORT
 
     def send_cmd(self, cmd, params,rx_len,verbose=False):
         """ send a cmd to the device """
@@ -174,7 +193,9 @@ class Fuelsensor_interface(object):
                 if(len(data) >= rx_len + 2):
                     data = data[0:rx_len + 2] #chunk garbage bytes
                     crc = str(data[len(data) - 2:])
-                    calculated_crc = struct.pack('>H', crc16(str(data[4:len(data)- 2])))
+                    aux = crc16(str(data[4:len(data)- 2]))
+                    calculated_crc = struct.pack('>H', aux)
+                    #print "crc: ",aux
                     if(verbose):
                         self.print_modbus(str(data))
                     if crc == calculated_crc:
@@ -193,6 +214,7 @@ class Fuelsensor_interface(object):
                 self.send_batch(packet)
                 return
         return data
+
     def get_periodic_report(self, rx_len,log,verbose= False):
         while(True):
             data = self.receive_periodic(rx_len)
@@ -289,6 +311,13 @@ class Fuelsensor_interface(object):
         print "height: " + str(height) + " [m]"
         return height
 
+    def get_reset_reason(self):
+        """ get the last reset reason according to RESET_REASON definition"""
+        data = self.send_cmd_without_params(GET_RESET_REASON, 8)
+        reason = struct.unpack('<I', data[4:8])[0]
+        self.print_modbus(data)
+        print '0x{0:08X}'.format(reason)
+        return reason
 
     def get_temp(self):
         data = self.send_cmd_without_params(GET_TEMP, 8)
@@ -336,7 +365,29 @@ class Fuelsensor_interface(object):
         return pos   
     def reset(self):
         """ reset fuelsensor and enter into Bootloader mode"""
-        self.send_cmd_without_params(RESET, 0)
+        while 1:
+            try:
+                print 'reseting... ',
+                self.send_cmd_without_params(RESET, 0)
+                data = ''
+                while len(data) < 12:
+                    data += self.receive()
+                    if(len(data) >= 12):
+                        if(data == 'bootloader\n\r'):
+                            print 'done!'
+                            return
+                        else:
+                            print 'unknown response: ',data
+            except Exception as e:
+                print e
+        #self.send_raw_byte(0xFF)
+
+    def jump_to_bld(self):
+        """Jump to bootloader from bld_app."""
+        print "jumping to bootloader"
+        packet = bytearray()
+        packet.append('b')
+        self.send_raw_byte(packet)
 
     def send_cmd_without_params(self, name, num_bytes):
         """ send command name, filling params with 4 zeros"""
@@ -364,10 +415,14 @@ class Fuelsensor_interface(object):
             try:
                 if(verbose):
                     print "connecting...",
-                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.socket.settimeout(self.timeout)
-                self.socket.connect((self.TCP_IP, self.TCP_PORT))
-                #self.socket.settimeout(None)
+                if(self.SERIAL_PORT):
+                    self.ser = serial.Serial(self.SERIAL_PORT, 115200, timeout=self.timeout)
+
+                else:
+                    self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.socket.settimeout(self.timeout)
+                    self.socket.connect((self.TCP_IP, self.TCP_PORT))
+                    #self.socket.settimeout(None)
                 if(verbose):
                     print "success!"
                 return
@@ -377,6 +432,7 @@ class Fuelsensor_interface(object):
                 self.close_socket()
                 #return
     def receive_periodic(self,length):
+        """Support for serial communication not yet implemented"""
         self.connect(False)
         print "waiting for report-> ", 
         data = ""
@@ -406,24 +462,15 @@ class Fuelsensor_interface(object):
             try:
                 if(verbose):
                     print "sending: ",
-                    #self.print_modbus(str(packet))
+                    self.print_modbus(str(packet))
                 start_time = (time.time()*1000)
-                #self.print_modbus(str(packet))
 
-                #self.socket.send(packet)
                 if(transmit):
                     self.send_batch(packet)
-                
-                #counter = 5 
                 data = ""
-
                 while(len(data) < length):
-                    #counter -= 1
-                    data += self.socket.recv(self.BUFFER_SIZE)
-                    
-                    # if(verbose):
-                    #     print data
-                    #self.print_modbus(data)
+
+                    data += self.receive()
                      
                     if(len(data) >= length):
                         stop_time = (time.time()*1000)
@@ -433,36 +480,30 @@ class Fuelsensor_interface(object):
                             print "time elapsed: ",
                             print str(stop_time - start_time)
                             print "data received ok: ",
-                            if(verbose):
-                                self.print_modbus(data)
-
+                            self.print_modbus(data)
 
                         return data
                 
             except Exception as e:
                 #self.print_modbus(data)
                 print "receive_retry: ",e
-                
-                if(True):
-                    self.close_socket()
-                    self.connect()
+                self.close_socket()
+                self.connect()
 
     def close_socket(self, verbose = True):
         """ Try to close tcp/ip SOCKET with FuelSensor device"""
         #lets close socket
-        #self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
-        #time.sleep(0.1)
-        #lets reasign socket so it can be opened again
-        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #self.socket.settimeout(self.timeout)
+
+        if(self.SERIAL_PORT):
+            if(self.ser.is_open):
+                self.ser.close()
+        else:
+            self.socket.close()
+
         time.sleep(0.1)
 
     def print_modbus(self,res):
         print(":".join("{:02x}".format(ord(c)) for c in res))
-    #def backup_timeseries(self):
-    #    params = bytearray()
-    #    self.send_cmd(BK_TIMESERIES,params,8)
 
     def get_param(self, param_id, num_bytes_response):
         #TODO: Implement get_param function. get_param should query, print and return the parameter given by param_id. 
@@ -519,8 +560,17 @@ class Fuelsensor_interface(object):
     def send_batch(self,packet):
         packet_size = 4 
         for i in range(len(packet)/packet_size):
-            self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
-            time.sleep(0.05)  
+            if(self.SERIAL_PORT):
+                self.ser.write(packet[i*packet_size:i*packet_size+packet_size])
+            else:
+                self.socket.send(packet[i*packet_size:i*packet_size+packet_size])
+            time.sleep(0.05)
+    def receive(self):
+        if(self.SERIAL_PORT):
+            data = self.ser.read()
+        else:
+            data = self.socket.recv(self.BUFFER_SIZE)
+        return data
 
     def get_reg(self):
         """ returns last unread log regsiter as raw_log. If there is no registers it returns 0.
@@ -535,8 +585,11 @@ class Fuelsensor_interface(object):
         Cada registro debe contar con un ID, para determinar si la funcion increment_reg()
 
          """
-    def send_raw_byte(self,byte):
-        self.socket.send(bytearray(byte))
+    def send_raw_byte(self,byte,serial=False):
+        if(self.SERIAL_PORT):
+            self.ser.write(bytearray(byte))
+        else:
+            self.socket.send(bytearray(byte))
 
 
 class Log(object):
