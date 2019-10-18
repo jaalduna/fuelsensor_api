@@ -20,7 +20,7 @@ else:
     data_file = 'data'
 
 fs = Fuelsensor_interface(ip,port)
-fs.use_serial()
+fs.use_serial('COM5')
 fs.connect()
 print "backup_timeseries"
 fs.bk_timeseries()
