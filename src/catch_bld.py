@@ -5,13 +5,10 @@ from Bootloader import Bootloader
 b = Bootloader('172.19.6.188',5000) #config conversor wiznet CDH48 
 
 while True:
-	b.connect()
 	try:
-		b.read_version(False)
+		b.read_version()
 	except Exception as e:
-		print "Hi"
-		print type(e)
+		print e, type(e)
 	finally:
-		b.close_socket()
-	time.sleep(5)
+		time.sleep(5)
 
