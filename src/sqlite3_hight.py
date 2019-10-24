@@ -75,13 +75,13 @@ def sql_fetch():
 		conn.close()
 
 
-#altura_raw = 18.9
-# fs = Fuelsensor_interface('192.168.100.187',5000)
-# fs.connect()
-# fs.get_app_version()
-# altura_raw = fs.get_height()
-# fs.get_pos()
-# fs.close_socket()
+altura_raw = 18.9
+fs = Fuelsensor_interface('192.168.100.187',5000)
+fs.connect()
+fs.get_app_version()
+altura_raw = fs.get_height()
+fs.get_pos()
+fs.close_socket()
 
 altura_raw = 18.9
 # # #type(altura_raw)
