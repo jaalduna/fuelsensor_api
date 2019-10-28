@@ -182,15 +182,15 @@ class Fuelsensor_interface(object):
 
     def insert_data(self,hight,table='estanque_1', db='fs_data.db'):
         try:
-            conn = sqlite3.connect("fs_data.db")
+            conn = sqlite3.connect(db)
             if conn:
                 cursor = conn.cursor()
-                print 'Adding new entry to table {}...'.format(table),
+                print 'Adding new entry to table {0}...'.format(table),
                 now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                consulta ='''INSERT INTO estanque_1(
+                consulta ='''INSERT INTO {0}(
                         fecha_hora_lectura_sensor,
                         altura_raw)
-                        VALUES (?,?);'''
+                        VALUES (?,?);'''.format(table)
                 cursor.execute(consulta,(now,hight))
                 print 'Done'
 
@@ -199,6 +199,20 @@ class Fuelsensor_interface(object):
  
         finally:
             conn.commit()
+            cursor.close()
+            conn.close()
+
+    def sql_fetch(self, table='estanque_1', db='fs_data.db'):
+        try:
+            conn = sqlite3.connect(db)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM {0}".format(table))
+            rows= cursor.fetchall()
+            for row in rows:
+                print row
+        except:
+            print "Can't connet to database"
+        finally:
             cursor.close()
             conn.close()
 
