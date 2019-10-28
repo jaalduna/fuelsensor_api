@@ -3,7 +3,6 @@ import crcmod
 import socket
 import time
 import sqlite3
-import datetime
 
 #import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
