@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import struct
 import crcmod
 import socket
