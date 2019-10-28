@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import struct
 import crcmod
 import socket
@@ -697,6 +698,3 @@ class Log(object):
 # plt.plot(data_sdft)
 # plt.ylabel('norm echo')
 # plt.show()
-
-
-
