@@ -12,7 +12,7 @@ fs.connect()
 fs.reset()
 time.sleep(0.2)
 
-#fs.jump_to_bld()
+fs.jump_to_bld()
 
 #fs.send_raw_byte(0xFF)
 #fs.backup_timeseries() # ver porque se pega la respuesta aqui, ver que hay en la interfaz serial o bien debugear el codigo, programando con el pickit 2.

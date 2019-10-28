@@ -2,6 +2,9 @@ import struct
 import crcmod
 import socket
 import time
+import sqlite3
+import datetime
+
 #import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
 
@@ -151,13 +154,67 @@ class Fuelsensor_interface(object):
         self.TCP_IP = TCP_IP
         self.TCP_PORT = TCP_PORT 
         self.BUFFER_SIZE  = 2048
-        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket = None
         self.timeout = 5
         #self.socket.settimeout(self.timeout)
 
 
-    def __del__(self):
-        self.socket.close()
+    #def __del__(self):
+    #    self.socket.close()
+
+    def create_table(self, table='estanque_1', db='fs_data.db'):
+        print 'Re-creating table \'{}\'...'.format(table),
+        conn = sqlite3.connect(db)
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='{0}'".format(table))
+            if cursor.fetchone()[0]==1:
+                cursor.execute("drop table {0}".format(table))
+            
+            cursor.execute('''CREATE TABLE {0}(
+                        id integer PRIMARY KEY AUTOINCREMENT,
+                        fecha_hora_lectura_sensor datetime NOT NULL,
+                        altura_raw real NOT NULL)'''.format(table))
+
+            print 'Done'
+            cursor.close()
+            conn.close()
+
+    def insert_data(self,hight,table='estanque_1', db='fs_data.db'):
+        try:
+            conn = sqlite3.connect(db)
+            if conn:
+                cursor = conn.cursor()
+                print 'Adding new entry to table {0}...'.format(table),
+                now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+                consulta ='''INSERT INTO {0}(
+                        fecha_hora_lectura_sensor,
+                        altura_raw)
+                        VALUES (?,?);'''.format(table)
+                cursor.execute(consulta,(now,hight))
+                print 'Done'
+
+        except Exception as e:
+            print ("Exception: ",e)
+ 
+        finally:
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+    def sql_fetch(self, table='estanque_1', db='fs_data.db'):
+        try:
+            conn = sqlite3.connect(db)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM {0}".format(table))
+            rows= cursor.fetchall()
+            for row in rows:
+                print row
+        except:
+            print "Can't connet to database"
+        finally:
+            cursor.close()
+            conn.close()
 
     def send_cmd(self, cmd, params,rx_len,verbose=False):
         """ send a cmd to the device """
@@ -654,6 +711,3 @@ class Log(object):
 # plt.plot(data_sdft)
 # plt.ylabel('norm echo')
 # plt.show()
-
-
-
