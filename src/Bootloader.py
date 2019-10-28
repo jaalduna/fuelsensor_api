@@ -46,8 +46,8 @@ class Bootloader(object):
             mayor_version = response[1]
             minor_version = response[2]
             print "Bootloader version: "+ str(mayor_version) + "." + str(minor_version)
-        except:
-            print "error"
+        except Exception as e:
+            print "read_version: ",e
             time.sleep(1)
     def tx_rx_cmd(self,cmd_name, response_len, payload = None, connect = True):
         packet = bytearray()
@@ -91,8 +91,8 @@ class Bootloader(object):
         response = self.tx_rx_cmd(ERASE_FLASH, 5,None,connect)
         try:
             print "flash erased"
-        except:
-            print "error"
+        except Exception as e:
+            print "erase_flash: ",e
             time.sleep(1)
 #02 00 00 04 00 00 fa
     def program_flash(self, record, verbose = False, connect = True):
@@ -190,8 +190,8 @@ class Bootloader(object):
                 #self.socket.settimeout(None)
                 print "success!"
                 return
-            except:
-                print "can't connect"
+            except Exception as e:
+                print "connect: ",e
                 self.close_socket()
                 #return
 
@@ -235,9 +235,9 @@ class Bootloader(object):
                 else:
                     return 0
                 
-            except:
+            except Exception as e:
                 
-                print "no answer...",
+                print "receive_retry: ",e
                 
                 if(True):
                     self.close_socket()
