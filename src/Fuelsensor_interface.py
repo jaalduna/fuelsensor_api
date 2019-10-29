@@ -38,12 +38,13 @@ crc16 = crcmod.predefined.mkPredefinedCrcFun("xmodem")
 
 class Param(object):
     """ Param Class """
-    def __init__(self,interface, param_id, num_bytes):
+    def __init__(self,interface, param_id, num_bytes, name):
         super(Param, self).__init__()
         self.param_id = param_id 
         self.num_bytes = num_bytes
         self.value = 0
         self.interface = interface
+        self.name = name
     def get_value(self):
         if(self.num_bytes == 1):
             self.value = self.interface.get_param_byte(self.param_id)
@@ -62,6 +63,8 @@ class Param(object):
         elif (self.num_bytes == 4):
             self.interface.set_param_float_32(self.param_id, value)
             self.value = self.interface.get_param_float_32(self.param_id)
+        print self.name,self.value
+
 
 
 
@@ -89,25 +92,25 @@ class Params(object):
         self.PARAM_SDFT_SAMPLE_RATE = 0x1f
         self.PARAM_SDFT_N_SAMPLES_ONE_VALID = 0x21
         self.PARAM_SKIP_PARAM = 0x23
-        self.data_vector_type = Param(interface,self.PARAM_DATA_VECTOR_TYPE,2)
-        self.data_vector_offset = Param(interface,self.PARAM_DATA_VECTOR_OFFSET,2)
-        self.pga_gain = Param(interface, self.PARAM_PGA_GAIN,1)
-        self.num_pulses = Param(interface, self.PARAM_NUM_PULSES,1)
-        self.pulse_period = Param(interface, self.PARAM_PULSE_PERIOD,1)
-        self.pulse_width = Param(interface, self.PARAM_PULSE_WIDTH,1)
-        self.res_hv = Param(interface, self.PARAM_RES_HV,1)
-        self.sdft_min_peak_value_th = Param(interface, self.PARAM_SDFT_MIN_PEAK_VALUE_TH,4)
-        self.sdft_k = Param(interface, self.PARAM_SDFT_K,2)
-        self.sdft_n = Param(interface, self.PARAM_SDFT_N,2)
-        self.sdft_i_min = Param(interface,self.PARAM_SDFT_I_MIN,2)
-        self.sdft_min_eco_limit = Param(interface, self.PARAM_SDFT_MIN_ECO_LIMIT,1)
-        self.sdft_max_eco_limit = Param(interface, self.PARAM_SDFT_MAX_ECO_LIMIT,1)
-        self.sdft_var_norm = Param(interface, self.PARAM_SDFT_VAR_NORM,4)
-        self.sdft_peak = Param(interface, self.PARAM_SDFT_PEAK,4)
-        self.sdft_sound_speed = Param(interface, self.PARAM_SDFT_SOUND_SPEED,2)
-        self.sdft_sample_rate = Param(interface, self.PARAM_SDFT_SAMPLE_RATE,2)
-        self.sdft_n_samples_one_valid = Param(interface, self.PARAM_SDFT_N_SAMPLES_ONE_VALID,2)
-        self.skip_param = Param(interface, self.PARAM_SKIP_PARAM,2)
+        self.data_vector_type = Param(interface,self.PARAM_DATA_VECTOR_TYPE,2,'Data vector type')
+        self.data_vector_offset = Param(interface,self.PARAM_DATA_VECTOR_OFFSET,2,'Data vector offset')
+        self.pga_gain = Param(interface, self.PARAM_PGA_GAIN,1,'PGA gain')
+        self.num_pulses = Param(interface, self.PARAM_NUM_PULSES,1,'Number of pulses')
+        self.pulse_period = Param(interface, self.PARAM_PULSE_PERIOD,1,'Pulse period')
+        self.pulse_width = Param(interface, self.PARAM_PULSE_WIDTH,1,'Pulse ON time')
+        self.res_hv = Param(interface, self.PARAM_RES_HV,1,'HV Resistance')
+        self.sdft_min_peak_value_th = Param(interface, self.PARAM_SDFT_MIN_PEAK_VALUE_TH,4,'SDFT lower threshold')
+        self.sdft_k = Param(interface, self.PARAM_SDFT_K,2,'SDFT K')
+        self.sdft_n = Param(interface, self.PARAM_SDFT_N,2,'SDFT N')
+        self.sdft_i_min = Param(interface,self.PARAM_SDFT_I_MIN,2,'SDFT dead band')
+        self.sdft_min_eco_limit = Param(interface, self.PARAM_SDFT_MIN_ECO_LIMIT,1,'SDFT min eco limit')
+        self.sdft_max_eco_limit = Param(interface, self.PARAM_SDFT_MAX_ECO_LIMIT,1,'SDFT max eco limit')
+        self.sdft_var_norm = Param(interface, self.PARAM_SDFT_VAR_NORM,4,'SDFT var norm')
+        self.sdft_peak = Param(interface, self.PARAM_SDFT_PEAK,4,'SDFT upper threshold')
+        self.sdft_sound_speed = Param(interface, self.PARAM_SDFT_SOUND_SPEED,2,'SDFT sound speed')
+        self.sdft_sample_rate = Param(interface, self.PARAM_SDFT_SAMPLE_RATE,2,'SDFT sample rate')
+        self.sdft_n_samples_one_valid = Param(interface, self.PARAM_SDFT_N_SAMPLES_ONE_VALID,2,'SDFT max samples per cycle')
+        self.skip_param = Param(interface, self.PARAM_SKIP_PARAM,2,'SDFT skip parameter')
 
 class Node(object):
     """ Node class """
@@ -179,7 +182,7 @@ class Fuelsensor_interface(object):
             cursor.close()
             conn.close()
 
-    def insert_data(self,hight,table='estanque_1', db='fs_data.db'):
+    def insert_data(self,height,table='estanque_1', db='fs_data.db'):
         try:
             conn = sqlite3.connect(db)
             if conn:
@@ -190,7 +193,7 @@ class Fuelsensor_interface(object):
                         fecha_hora_lectura_sensor,
                         altura_raw)
                         VALUES (?,?);'''.format(table)
-                cursor.execute(consulta,(now,hight))
+                cursor.execute(consulta,(now,height))
                 print 'Done'
 
         except Exception as e:
@@ -201,7 +204,7 @@ class Fuelsensor_interface(object):
             cursor.close()
             conn.close()
 
-    def sql_fetch(self, table='estanque_1', db='fs_data.db'):
+    def fetch_table(self, table='estanque_1', db='fs_data.db'):
         try:
             conn = sqlite3.connect(db)
             cursor = conn.cursor()
@@ -210,7 +213,7 @@ class Fuelsensor_interface(object):
             for row in rows:
                 print row
         except:
-            print "Can't connet to database"
+            print "Can't connet to data base"
         finally:
             cursor.close()
             conn.close()
@@ -227,7 +230,7 @@ class Fuelsensor_interface(object):
         #fill with params values #4 bytes
         for i in range(len(params)):
             packet.append(params[i])
-#crc, not implemented yet
+        #crc, not implemented yet
         packet.append(0)
         packet.append(0)
         #packet = bytearray()
@@ -249,11 +252,12 @@ class Fuelsensor_interface(object):
                         break
                     else:
                         self.close_socket()
-                        raise Exception("bad crc")
+                        self.print_modbus(data)
+                        raise Exception("send_cmd: bad crc")
                 else:
                     # print len(data)
                     #self.print_modbus(data)
-                    raise Exception("not enougth rx bytes")
+                    raise Exception("send_cmd: not enougth rx bytes")
                     break
             else:
                 #send packet in batches of 4 bytes
