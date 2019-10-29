@@ -45,15 +45,17 @@ class Param(object):
         self.value = 0
         self.interface = interface
         self.name = name
-    def get_value(self):
+    def get_value(self,verbose=True):
         if(self.num_bytes == 1):
             self.value = self.interface.get_param_byte(self.param_id)
         elif self.num_bytes == 2:
             self.value = self.interface.get_param_unsigned_short(self.param_id)
         elif self.num_bytes ==4:
             self.value = self.interface.get_param_float_32(self.param_id)
+        if verbose:
+            print self.name,self.value
             
-    def set_value(self,value):
+    def set_value(self,value,verbose=True):
         if(self.num_bytes ==1):
             self.interface.set_param_byte(self.param_id, value)
             self.value = self.interface.get_param_byte(self.param_id)
@@ -63,7 +65,8 @@ class Param(object):
         elif (self.num_bytes == 4):
             self.interface.set_param_float_32(self.param_id, value)
             self.value = self.interface.get_param_float_32(self.param_id)
-        print self.name,self.value
+        if verbose:
+            print self.name,self.value
 
 
 
@@ -94,23 +97,23 @@ class Params(object):
         self.PARAM_SKIP_PARAM = 0x23
         self.data_vector_type = Param(interface,self.PARAM_DATA_VECTOR_TYPE,2,'Data vector type')
         self.data_vector_offset = Param(interface,self.PARAM_DATA_VECTOR_OFFSET,2,'Data vector offset')
-        self.pga_gain = Param(interface, self.PARAM_PGA_GAIN,1,'PGA gain')
-        self.num_pulses = Param(interface, self.PARAM_NUM_PULSES,1,'Number of pulses')
+        self.pga_gain = Param(interface, self.PARAM_PGA_GAIN,1,'PGA Gain')
+        self.num_pulses = Param(interface, self.PARAM_NUM_PULSES,1,'Pulse number')
         self.pulse_period = Param(interface, self.PARAM_PULSE_PERIOD,1,'Pulse period')
         self.pulse_width = Param(interface, self.PARAM_PULSE_WIDTH,1,'Pulse ON time')
         self.res_hv = Param(interface, self.PARAM_RES_HV,1,'HV Resistance')
-        self.sdft_min_peak_value_th = Param(interface, self.PARAM_SDFT_MIN_PEAK_VALUE_TH,4,'SDFT lower threshold')
+        self.sdft_min_peak_value_th = Param(interface, self.PARAM_SDFT_MIN_PEAK_VALUE_TH,4,'SDFT Lower threshold')
         self.sdft_k = Param(interface, self.PARAM_SDFT_K,2,'SDFT K')
         self.sdft_n = Param(interface, self.PARAM_SDFT_N,2,'SDFT N')
-        self.sdft_i_min = Param(interface,self.PARAM_SDFT_I_MIN,2,'SDFT dead band')
-        self.sdft_min_eco_limit = Param(interface, self.PARAM_SDFT_MIN_ECO_LIMIT,1,'SDFT min eco limit')
-        self.sdft_max_eco_limit = Param(interface, self.PARAM_SDFT_MAX_ECO_LIMIT,1,'SDFT max eco limit')
-        self.sdft_var_norm = Param(interface, self.PARAM_SDFT_VAR_NORM,4,'SDFT var norm')
-        self.sdft_peak = Param(interface, self.PARAM_SDFT_PEAK,4,'SDFT upper threshold')
-        self.sdft_sound_speed = Param(interface, self.PARAM_SDFT_SOUND_SPEED,2,'SDFT sound speed')
-        self.sdft_sample_rate = Param(interface, self.PARAM_SDFT_SAMPLE_RATE,2,'SDFT sample rate')
-        self.sdft_n_samples_one_valid = Param(interface, self.PARAM_SDFT_N_SAMPLES_ONE_VALID,2,'SDFT max samples per cycle')
-        self.skip_param = Param(interface, self.PARAM_SKIP_PARAM,2,'SDFT skip parameter')
+        self.sdft_i_min = Param(interface,self.PARAM_SDFT_I_MIN,2,'SDFT Dead band')
+        self.sdft_min_eco_limit = Param(interface, self.PARAM_SDFT_MIN_ECO_LIMIT,1,'SDFT Min eco limit')
+        self.sdft_max_eco_limit = Param(interface, self.PARAM_SDFT_MAX_ECO_LIMIT,1,'SDFT Max eco limit')
+        self.sdft_var_norm = Param(interface, self.PARAM_SDFT_VAR_NORM,4,'SDFT Var norm')
+        self.sdft_peak = Param(interface, self.PARAM_SDFT_PEAK,4,'SDFT Upper threshold')
+        self.sdft_sound_speed = Param(interface, self.PARAM_SDFT_SOUND_SPEED,2,'SDFT Sound speed')
+        self.sdft_sample_rate = Param(interface, self.PARAM_SDFT_SAMPLE_RATE,2,'SDFT Sample rate')
+        self.sdft_n_samples_one_valid = Param(interface, self.PARAM_SDFT_N_SAMPLES_ONE_VALID,2,'SDFT Max attempts per cycle')
+        self.skip_param = Param(interface, self.PARAM_SKIP_PARAM,2,'SDFT Skip parameter')
 
 class Node(object):
     """ Node class """
@@ -655,62 +658,4 @@ class Log(object):
         # timestamp, hight
     def log_parser(self,raw_log):
         """ read raw_log, parse it, create and update object attributes"""        
-        
-
-
-
-# fs_interface = Fuelsensor_interface()
-# fs_interface.connect()
-# fs_interface.reset()
-# fs_interface.close_socket()
-# for i in range(1,10):
-#     fs_interface.connect()
-#     params = bytearray()
-#     #fs_interface.reset()
-#     fs_interface.get_height()
-#     # fs_interface.reset()
-#     # fs_interface.reset()
-#     fs_interface.close_socket()
-#     time.sleep(0.5)
-#fs_interface.send_cmd(BK_TIMESERIES, params, 8)
-# time.sleep(0.5)
-
-# num_of_samples = 16000;
-# data_bytes_norm = fs_interface.get_complete_norm_echo(num_of_samples)
-# #data_bytes_sdft = fs_interface.get_complete_sdft_echo(num_of_samples)
-# #fs_interface.send_cmd(RESET, params, 0)
-# fs_interface.get_height()
-# fs_interface.get_pos()
-# fs_interface.close_socket()
-
-
-# # data_bytes_sdft = fs_interface.get_complete_sdft_echo(num_of_samples)
-# # fs_interface.close_socket()
-
-# data_norm = []
-# for i in range(0,num_of_samples/4):
-#     new_data = struct.unpack('<f', data_bytes_norm[i*4:(i+1)*4])
-
-#     # if (new_data[0] > 1 or new_data[0] < -1):
-#     #     print "new_data:" + str(new_data)
-#     #     pass
-#     #     new_data = (0.5,1)
-#     data_norm.append(new_data[0])
-# print len(data_norm)
-
-# plt.plot(data_norm)
-# plt.grid(True)
-# plt.title('Echo vs time')
-# plt.ylabel('norm echo')
-# plt.show()
-
-# data_sdft = []
-# for i in range(0,num_of_samples/4):
-#     new_data = struct.unpack('<f', data_bytes_sdft[i*4:(i+1)*4])
-#     data_sdft.append(new_data[0])
-# print len(data_sdft)
-
-
-# plt.plot(data_sdft)
-# plt.ylabel('norm echo')
-# plt.show()
+       

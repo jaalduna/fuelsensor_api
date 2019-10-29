@@ -2,10 +2,10 @@ import sys
 from Fuelsensor_interface import Fuelsensor_interface
 from Fuelsensor_interface import Params
 
-if len(sys.argv) == 3:
-    fs = Fuelsensor_interface(str(sys.argv[1]), int(sys.argv[2]))
+if len(sys.argv) == 2:
+    fs = Fuelsensor_interface(str(sys.argv[1]), 5000)
 else:
-    fs = Fuelsensor_interface('192.168.1.101', 5000)
+    fs = Fuelsensor_interface('192.168.100.187', 5000)
 
 params = Params(fs)
 

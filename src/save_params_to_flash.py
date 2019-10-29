@@ -2,14 +2,12 @@ import sys
 from Fuelsensor_interface import Fuelsensor_interface
 from Fuelsensor_interface import Params
 
-if len(sys.argv) == 3:
+if len(sys.argv) == 2:
     ip = str(sys.argv[1])
-    port = int(sys.argv[2])
 else:
     ip = '192.168.100.187'
-    port = 5000
 
-fs = Fuelsensor_interface(ip, port)
+fs = Fuelsensor_interface(ip, 5000)
 fs.connect()
 
 try:
