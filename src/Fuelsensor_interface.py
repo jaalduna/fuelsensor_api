@@ -2,7 +2,7 @@ import struct
 import crcmod
 import socket
 import time
-import sqlite3
+
 
 #import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
@@ -336,7 +336,7 @@ class Fuelsensor_interface(object):
                 if len(partial_data) == (4+packet_size+2): 
                     break;
             data +=partial_data[4:len(partial_data) - 2 ]
-            print len(data), "/", length,"\r",  
+            print "\r",len(data), "/", length  
         return data  
 
     def get_complete_sdft_echo(self, length,packet_size):

@@ -1,10 +1,19 @@
 from Fuelsensor_interface import Fuelsensor_interface
-import sqlite3
-fs = Fuelsensor_interface()
-#print sqlite3.datetime()
-fs.create_table()
-fs.insert_data(12)
-fs.insert_data(13)
-fs.insert_data(8)
+import MySQLdb
+import time
 
-fs.sql_fetch()
+while True:
+    try:
+        fs = Fuelsensor_interface('192.168.148.1',5000)
+
+        fs.create_table()
+
+        fs.connect()
+        height = fs.get_height()
+        fs.insert_data(height)
+
+    except Exception as e:
+        print e
+    finally:
+        fs.close_socket()
+        time.sleep(60)

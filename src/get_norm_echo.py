@@ -6,7 +6,7 @@ import struct
 import pickle
 
 #Default parameters
-ip = '192.168.100.187'
+ip = '192.168.148.1'
 port = 5000
 length = 10000
 packet_size = 50
