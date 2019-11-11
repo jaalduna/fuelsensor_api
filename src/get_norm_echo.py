@@ -5,19 +5,18 @@ import matplotlib.pyplot as plt
 import struct
 import pickle
 
-if len(sys.argv) == 6:
+#Default parameters
+ip = '192.168.100.1'
+port = 5000
+length = 2000
+packet_size = 50
+data_file = 'data'
+
+if len(sys.argv) >= 2:
     ip = str(sys.argv[1])
-    port = int(sys.argv[2])
-    length = int(sys.argv[3])
-    packet_size = int(sys.argv[4])
-    data_file = str(sys.argv[5])
-else:
-    print "not enought parameters, using default"
-    ip = '192.168.100.187'
-    port = 5000
-    length = 10000
-    packet_size = 50
-    data_file = 'data'
+    if len(sys.argv) >= 3:
+        length = int(sys.argv[2])
+
 
 fs = Fuelsensor_interface(ip,port)
 fs.connect()
