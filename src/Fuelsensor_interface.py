@@ -2,7 +2,7 @@ import struct
 import crcmod
 import socket
 import time
-import sqlite3
+import MySQLdb
 
 #import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
@@ -151,7 +151,7 @@ class Fuelsensor_interface(object):
     def __init__(self,TCP_IP='192.168.0.10',TCP_PORT=5000):
         super(Fuelsensor_interface, self).__init__()
         self.TCP_IP = TCP_IP
-        self.TCP_PORT = TCP_PORT 
+        self.TCP_PORT = TCP_PORT
         self.BUFFER_SIZE  = 2048
         #self.socket = None
         self.timeout = 5
@@ -161,54 +161,50 @@ class Fuelsensor_interface(object):
     #def __del__(self):
     #    self.socket.close()
 
-    def create_table(self, table='estanque_1', db='fs_data.db'):
+    def create_table(self, table='estanque_1', db='fs_data'):
         print 'Re-creating table \'{}\'...'.format(table),
-        conn = sqlite3.connect(db)
+        conn = MySQLdb.connect(host='localhost',user='pi',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='{0}'".format(table))
-            if cursor.fetchone()[0]==1:
-                cursor.execute("drop table {0}".format(table))
-            
-            cursor.execute('''CREATE TABLE {0}(
-                        id integer PRIMARY KEY AUTOINCREMENT,
-                        fecha_hora_lectura_sensor datetime NOT NULL,
-                        altura_raw real NOT NULL)'''.format(table))
+            cursor.execute("show tables like '{0}'".format(table))
+            tables = cursor.fetchall()
+	    for (table_name,) in cursor:
+                if table_name == table:
+			cursor.execute("drop table {0}".format(table))
+
+            cursor.execute('create table {0} (id integer primary key auto_increment, fecha_hora_lectura_sensor datetime not null, altura_raw float not null);'.format(table))
 
             print 'Done'
             cursor.close()
             conn.close()
 
-    def insert_data(self,hight,table='estanque_1', db='fs_data.db'):
+    def insert_data(self,hight,table='estanque_1', db='fs_data'):
         try:
-            conn = sqlite3.connect(db)
+	    conn = MySQLdb.connect(host='localhost',user='pi',passwd='aiko',db=db)
             if conn:
                 cursor = conn.cursor()
-                print 'Adding new entry to table {0}...'.format(table),
                 now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                consulta ='''INSERT INTO {0}(
-                        fecha_hora_lectura_sensor,
-                        altura_raw)
-                        VALUES (?,?);'''.format(table)
-                cursor.execute(consulta,(now,hight))
+                print 'Inserting new entry into table {0}...'.format(table),
+                query ='insert into {0} (fecha_hora_lectura_sensor,altura_raw) values (\'{1}\',{2});'.format(table, now, hight)
+                cursor.execute(query)
                 print 'Done'
 
-        except Exception as e:
-            print ("Exception: ",e)
- 
+#        except Exception as e:
+#            print ("Exception: ",e)
+
         finally:
             conn.commit()
             cursor.close()
             conn.close()
 
-    def sql_fetch(self, table='estanque_1', db='fs_data.db'):
+    def fetch_table(self, table='estanque_1', db='fs_data'):
         try:
-            conn = sqlite3.connect(db)
+            conn = MySQLdb.connect(host='localhost',user='pi',passwd='aiko',db=db)
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM {0}".format(table))
+            cursor.execute("select * from {0}".format(table))
             rows= cursor.fetchall()
             for row in rows:
-                print row
+                print type(row),row
         except:
             print "Can't connet to database"
         finally:
