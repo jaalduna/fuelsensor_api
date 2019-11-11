@@ -169,53 +169,44 @@ class Fuelsensor_interface(object):
 
     def create_table(self, table='estanque_1', db='fs_data'):
         print 'Re-creating table \'{}\'...'.format(table),
-        conn = MySQLdb.connect(host='localhost',user='pi',passwd='aiko',db=db)
+        conn = MySQLdb.connect(host='localhost',user='root',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
             cursor.execute("show tables like '{0}'".format(table))
             tables = cursor.fetchall()
-	    for (table_name,) in cursor:
+            for (table_name,) in cursor:
                 if table_name == table:
-			cursor.execute("drop table {0}".format(table))
-
+                    cursor.execute("drop table {0}".format(table))
             cursor.execute('create table {0} (id integer primary key auto_increment, fecha_hora_lectura_sensor datetime not null, altura_raw float not null);'.format(table))
-
             print 'Done'
             cursor.close()
             conn.close()
 
-    def insert_data(self,height,table='estanque_1', db='fs_data.db'):
-        try:
-	    conn = MySQLdb.connect(host='localhost',user='pi',passwd='aiko',db=db)
-            if conn:
-                cursor = conn.cursor()
-                now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                print 'Inserting new entry into table {0}...'.format(table),
-                query ='insert into {0} (fecha_hora_lectura_sensor,altura_raw) values (\'{1}\',{2});'.format(table, now, height)
-                cursor.execute(query)
-                print 'Done'
-
-#        except Exception as e:
-#            print ("Exception: ",e)
-
-        finally:
+    def insert_data(self,height,table='estanque_1', db='fs_data'):
+        conn = MySQLdb.connect(host='localhost',user='root',passwd='aiko',db=db)
+        if conn:
+            cursor = conn.cursor()
+            now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+            print 'Inserting new entry into table {0}...'.format(table),
+            query ='insert into {0} (fecha_hora_lectura_sensor,altura_raw) values (\'{1}\',{2});'.format(table, now, height)
+            cursor.execute(query)
             conn.commit()
             cursor.close()
             conn.close()
+            print 'Done'
 
     def fetch_table(self, table='estanque_1', db='fs_data'):
-        try:
-            conn = MySQLdb.connect(host='localhost',user='pi',passwd='aiko',db=db)
+        conn = MySQLdb.connect(host='localhost',user='root',passwd='aiko',db=db)
+        if conn:
             cursor = conn.cursor()
             cursor.execute("select * from {0}".format(table))
-            rows= cursor.fetchall()
+            rows = cursor.fetchall()
             for row in rows:
                 print type(row),row
-        except:
-            print "Can't connet to database"
-        finally:
             cursor.close()
             conn.close()
+
+            
 
     def send_cmd(self, cmd, params,rx_len,verbose=False):
         """ send a cmd to the device """
@@ -654,66 +645,3 @@ class Log(object):
         # timestamp, hight
     def log_parser(self,raw_log):
         """ read raw_log, parse it, create and update object attributes"""        
-<<<<<<< HEAD
-        
-
-
-
-# fs_interface = Fuelsensor_interface()
-# fs_interface.connect()
-# fs_interface.reset()
-# fs_interface.close_socket()
-# for i in range(1,10):
-#     fs_interface.connect()
-#     params = bytearray()
-#     #fs_interface.reset()
-#     fs_interface.get_height()
-#     # fs_interface.reset()
-#     # fs_interface.reset()
-#     fs_interface.close_socket()
-#     time.sleep(0.5)
-#fs_interface.send_cmd(BK_TIMESERIES, params, 8)
-# time.sleep(0.5)
-
-# num_of_samples = 16000;
-# data_bytes_norm = fs_interface.get_complete_norm_echo(num_of_samples)
-# #data_bytes_sdft = fs_interface.get_complete_sdft_echo(num_of_samples)
-# #fs_interface.send_cmd(RESET, params, 0)
-# fs_interface.get_height()
-# fs_interface.get_pos()
-# fs_interface.close_socket()
-
-
-# # data_bytes_sdft = fs_interface.get_complete_sdft_echo(num_of_samples)
-# # fs_interface.close_socket()
-
-# data_norm = []
-# for i in range(0,num_of_samples/4):
-#     new_data = struct.unpack('<f', data_bytes_norm[i*4:(i+1)*4])
-
-#     # if (new_data[0] > 1 or new_data[0] < -1):
-#     #     print "new_data:" + str(new_data)
-#     #     pass
-#     #     new_data = (0.5,1)
-#     data_norm.append(new_data[0])
-# print len(data_norm)
-
-# plt.plot(data_norm)
-# plt.grid(True)
-# plt.title('Echo vs time')
-# plt.ylabel('norm echo')
-# plt.show()
-
-# data_sdft = []
-# for i in range(0,num_of_samples/4):
-#     new_data = struct.unpack('<f', data_bytes_sdft[i*4:(i+1)*4])
-#     data_sdft.append(new_data[0])
-# print len(data_sdft)
-
-
-# plt.plot(data_sdft)
-# plt.ylabel('norm echo')
-# plt.show()
-=======
-       
->>>>>>> fd8b2b4c2cbf2367b61f691b0a535022acb9bf44
