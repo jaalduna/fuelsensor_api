@@ -169,7 +169,7 @@ class Fuelsensor_interface(object):
 
     def create_table(self, table='estanque_1', db='fs_data'):
         print 'Re-creating table \'{}\'...'.format(table),
-        conn = MySQLdb.connect(host='localhost',user='root',passwd='aiko',db=db)
+        conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
             cursor.execute("show tables like '{0}'".format(table))
@@ -183,7 +183,7 @@ class Fuelsensor_interface(object):
             conn.close()
 
     def insert_data(self,height,table='estanque_1', db='fs_data'):
-        conn = MySQLdb.connect(host='localhost',user='root',passwd='aiko',db=db)
+        conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
@@ -196,7 +196,7 @@ class Fuelsensor_interface(object):
             print 'Done'
 
     def fetch_table(self, table='estanque_1', db='fs_data'):
-        conn = MySQLdb.connect(host='localhost',user='root',passwd='aiko',db=db)
+        conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
             cursor.execute("select * from {0}".format(table))
