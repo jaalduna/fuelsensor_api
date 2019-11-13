@@ -167,8 +167,9 @@ class Fuelsensor_interface(object):
     #def __del__(self):
     #    self.socket.close()
 
-    def create_table(self, table='estanque_1', db='fs_data'):
-        print 'Re-creating table \'{}\'...'.format(table),
+    def create_table(self, table='estanque_1', db='fs_data',verbose=True):
+        if verbose:
+            print 'Re-creating table \'{}\'...'.format(table),
         conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
@@ -178,22 +179,25 @@ class Fuelsensor_interface(object):
                 if table_name == table:
                     cursor.execute("drop table {0}".format(table))
             cursor.execute('create table {0} (id integer primary key auto_increment, fecha_hora_lectura_sensor datetime not null, altura_raw float not null);'.format(table))
-            print 'Done'
+            if verbose:
+                print 'Done'
             cursor.close()
             conn.close()
 
-    def insert_data(self,height,table='estanque_1', db='fs_data'):
+    def insert_data(self,height,table='estanque_1', db='fs_data',verbose=True):
         conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            print 'Inserting new entry into table {0}...'.format(table),
+            if verbose:
+                print 'Inserting new entry {0} into table {1}...'.format(height,table),
             query ='insert into {0} (fecha_hora_lectura_sensor,altura_raw) values (\'{1}\',{2});'.format(table, now, height)
             cursor.execute(query)
             conn.commit()
             cursor.close()
             conn.close()
-            print 'Done'
+            if verbose:
+                print 'Done'
 
     def fetch_table(self, table='estanque_1', db='fs_data'):
         conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
@@ -206,7 +210,6 @@ class Fuelsensor_interface(object):
             cursor.close()
             conn.close()
 
-            
 
     def send_cmd(self, cmd, params,rx_len,verbose=False):
         """ send a cmd to the device """
@@ -344,11 +347,12 @@ class Fuelsensor_interface(object):
             print len(data), "/", length,"\r",
         return data  
 
-    def get_height(self):
+    def get_height(self,verbose=True):
         """ get hight of liquid in meters."""    
         data = self.send_cmd_without_params(GET_HEIGHT, 8)
         height = struct.unpack('<f', data[4:8])[0]
-        print "height: " + str(height) + " [m]"
+        if verbose:
+            print "height: " + str(height) + " [m]"
         return height
 
     def get_reset_reason(self):

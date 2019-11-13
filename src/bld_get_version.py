@@ -9,6 +9,6 @@ else:
 #print b.TCP_PORT
 #b.jump_to_bld()
 b.read_version()
-b.connect()
-b.jump_to_app()
-b.close_socket()
+#b.connect()
+#b.jump_to_app()
+#b.close_socket()
