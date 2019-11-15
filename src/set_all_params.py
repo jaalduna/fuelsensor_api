@@ -20,17 +20,17 @@ try:
 	#params.data_vector_type.set_value(0)
 	#params.data_vector_offset.set_value(0)
 
-    params.sdft_peak.set_value(0.5)
-    params.sdft_min_peak_value_th.set_value(0.1)
+    params.sdft_peak.set_value(5)
+    params.sdft_min_peak_value_th.set_value(0.5)
     params.sdft_n.set_value(107)
     params.sdft_i_min.set_value(400)
     params.sdft_min_eco_limit.set_value(30)
     params.sdft_max_eco_limit.set_value(80)
     params.sdft_var_norm.set_value(50000)
     
-    params.sdft_sound_speed.set_value(1495)
+    params.sdft_sound_speed.set_value(1660)
     params.sdft_sample_rate.set_value(2981)
-    params.sdft_n_samples_one_valid.set_value(1)
+    params.sdft_n_samples_one_valid.set_value(10)
     params.skip_param.set_value(20000)
 
     #calculate SDFT K parameter value
