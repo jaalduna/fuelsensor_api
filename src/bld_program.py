@@ -9,8 +9,8 @@ else:
 
 b = Bootloader(ip, 5000)
 b.read_version()
-b.connect()
 print "programming ",file,"into",ip
 b.program_file(file)
+b.connect()
 b.jump_to_app()
 b.close_socket()

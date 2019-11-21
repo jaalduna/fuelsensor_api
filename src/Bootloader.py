@@ -349,7 +349,7 @@ class Bootloader(object):
                 print "program transfer complete ;)"
                 break
     def enter_bootloader(self):
-        response = self.socket.send(bytearray(1))
+        response = self.socket.send(bytearray('b'))
 # b = Bootloader()
 # b.read_version()
 # b.connect()

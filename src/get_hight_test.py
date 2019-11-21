@@ -9,7 +9,7 @@ else:
     fs = Fuelsensor_interface('192.168.148.1',5000)
 #print "conectando"
 fs.connect()
-#fs.get_app_version()
+fs.get_app_version()
 fs.get_height()
 fs.get_pos()
 fs.close_socket()

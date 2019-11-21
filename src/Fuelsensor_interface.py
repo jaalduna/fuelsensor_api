@@ -27,6 +27,7 @@ GET_TIMESTAMP = 14
 SET_TIMESTAMP = 15
 GET_IMU_ACCEL_VAR = 16
 GET_RESET_REASON = 17
+GET_SDFT_HISTO = 18
 
 #TODO: create a list of PARAMS constants using fields "PARAM_ID" and "nombre" from
 # the table "lista de parametros" located at
@@ -142,6 +143,8 @@ class Fuelsensor_interface(object):
     GET_TIMESTAMP = 14
     SET_TIMESTAMP = 15
     GET_IMU_ACCEL_VAR = 16
+    GET_RESET_REASON = 17
+    GET_SDFT_HISTO = 18
 
     #RESET_REASON definition from PIC32 config
     RESET_REASON_NONE = 0x00000000
@@ -167,46 +170,66 @@ class Fuelsensor_interface(object):
     #def __del__(self):
     #    self.socket.close()
 
-    def create_table(self, table='estanque_1', db='fs_data',verbose=True):
+    def create_table(self, table='estanque_1', db='fs_data', host='localhost', verbose=True, drop_table=False):
         if verbose:
-            print 'Re-creating table \'{}\'...'.format(table),
-        conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
+            print "Initializing database '{0}' at {2}...".format(db,host)
+        conn = MySQLdb.connect(host=host, user='aiko', passwd='aiko')
         if conn:
             cursor = conn.cursor()
-            cursor.execute("show tables like '{0}'".format(table))
-            tables = cursor.fetchall()
-            for (table_name,) in cursor:
-                if table_name == table:
-                    cursor.execute("drop table {0}".format(table))
-            cursor.execute('create table {0} (id integer primary key auto_increment, fecha_hora_lectura_sensor datetime not null, altura_raw float not null);'.format(table))
-            if verbose:
-                print 'Done'
+            cursor.execute("set sql_notes = 0") #Disable warnings pop-up
+            cursor.execute("create database if not exists {0}".format(db))
+            cursor.execute("use {0}".format(db))
+            if (drop_table):
+                if verbose:
+                    print "Droping existing table '{0}', if any...".format(table),
+                cursor.execute("drop table if exists {0}".format(table))
+            query = '''create table if not exists {0}(
+                       id integer primary key auto_increment,
+                       fecha_hora_lectura_sensor datetime not null,
+                       altura_raw float not null)'''.format(table)
+            cursor.execute(query)
+            cursor.execute("set sql_notes = 1") #Enable warnings pop-up
             cursor.close()
             conn.close()
+            if verbose:
+                print 'Done.'
 
-    def insert_data(self,height,table='estanque_1', db='fs_data',verbose=True):
-        conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
+    def insert_row(self, height, table='estanque_1', db='fs_data', host='localhost', verbose=True):
+        conn = MySQLdb.connect(host=host, user='aiko', passwd='aiko', db=db)
         if conn:
             cursor = conn.cursor()
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
             if verbose:
                 print 'Inserting new entry {0} into table {1}...'.format(height,table),
-            query ='insert into {0} (fecha_hora_lectura_sensor,altura_raw) values (\'{1}\',{2});'.format(table, now, height)
+            query = 'insert into {0} (fecha_hora_lectura_sensor,altura_raw) values (\'{1}\',{2})'.format(table, now, height)
             cursor.execute(query)
             conn.commit()
             cursor.close()
             conn.close()
             if verbose:
-                print 'Done'
+                print 'Done.'
 
-    def fetch_table(self, table='estanque_1', db='fs_data'):
-        conn = MySQLdb.connect(host='localhost',user='aiko',passwd='aiko',db=db)
+    def delete_row(self,id,table='estanque_1',db='fs_data',host='localhost',verbose=True):
+        conn = MySQLdb.connect(host=host,user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
-            cursor.execute("select * from {0}".format(table))
-            rows = cursor.fetchall()
-            for row in rows:
-                print type(row),row
+            if verbose:
+                print 'Removing entry {0} from table {1} in database {2} at {3}...'.format(id,table,db,host)
+            cursor.execute('delete from {0} where id = {1}'.format(table,id))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            if verbose:
+                print 'Done.'
+
+    def fetch_table(self,table='estanque_1',db='fs_data',host='localhost'):
+        conn = MySQLdb.connect(host=host,user='aiko',passwd='aiko',db=db)
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("select * from {0} where id < 10".format(table))
+            table = cursor.fetchall()
+            for row in table:
+                print row
             cursor.close()
             conn.close()
 
@@ -293,7 +316,7 @@ class Fuelsensor_interface(object):
         data = self.send_cmd_without_params(BK_TIMESERIES, 4)
         return data
     def get_norm_echo(self,offset, length):
-        """ Return normalized echo"""
+        """ Returns normalized echo"""
         params = bytearray()
         params += struct.pack('>H', offset)
         params += struct.pack('>H', length)
@@ -302,7 +325,7 @@ class Fuelsensor_interface(object):
         res = self.send_cmd(GET_NORM_ECHO, params, length +4) #+4 is for the  header 
         return res
     def get_sdft_echo(self,offset,length):
-        """ returns sdft of echo"""
+        """ Returns sdft of echo"""
         params = bytearray()
         params += struct.pack('>H', offset)
         params += struct.pack('>H', length)
@@ -310,6 +333,16 @@ class Fuelsensor_interface(object):
             params.append(0)
         res = self.send_cmd(GET_SDFT_ECHO, params, length+4)
         return res        
+
+    def get_sdft_histo(self, offset, length):
+        """ Returns sdft histogram """
+        params = bytearray()
+        params += struct.pack('>H', offset)
+        params += struct.pack('>H', length)
+        for i in range(4):
+            params.append(0)
+        res = self.send_cmd(GET_SDFT_HISTO, params, length+4)
+        return res   
 
     def get_complete_norm_echo(self, length,packet_size):
         """ get normalized echo timeseries of length 'length'"""
@@ -347,6 +380,24 @@ class Fuelsensor_interface(object):
             print len(data), "/", length,"\r",
         return data  
 
+    def get_complete_sdft_histo(self, length, packet_size):
+        """get sdft histo"""
+        truncated_len =  int(length / packet_size) + 1
+        data = bytearray()
+        for i in range (1,truncated_len):
+            while(True):
+                try:
+                        partial_data = self.get_sdft_histo((i-1)*packet_size,packet_size)
+                except Exception as e:
+                        print "sdft_histo: ",e
+                        partial_data = bytearray(0)
+                time.sleep(0.01)
+                if len(partial_data) == (4+packet_size+2): 
+                    break;
+            data +=partial_data[4:len(partial_data) - 2 ]
+            print len(data), "/", length,"\r",
+        return data
+
     def get_height(self,verbose=True):
         """ get hight of liquid in meters."""    
         data = self.send_cmd_without_params(GET_HEIGHT, 8)
@@ -355,7 +406,7 @@ class Fuelsensor_interface(object):
             print "height: " + str(height) + " [m]"
         return height
 
-    def get_reset_reason(self):
+    def get_last_reset_reason(self):
         """ get the last reset reason according to RESET_REASON definition"""
         data = self.send_cmd_without_params(GET_RESET_REASON, 8)
         reason = struct.unpack('<I', data[4:8])[0]
