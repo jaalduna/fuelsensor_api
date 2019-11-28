@@ -27,7 +27,7 @@ GET_TIMESTAMP = 14
 SET_TIMESTAMP = 15
 GET_IMU_ACCEL_VAR = 16
 GET_RESET_REASON = 17
-GET_SDFT_HISTO = 18
+GET_FIFO_BUFFER = 18
 
 #TODO: create a list of PARAMS constants using fields "PARAM_ID" and "nombre" from
 # the table "lista de parametros" located at
@@ -144,7 +144,7 @@ class Fuelsensor_interface(object):
     SET_TIMESTAMP = 15
     GET_IMU_ACCEL_VAR = 16
     GET_RESET_REASON = 17
-    GET_SDFT_HISTO = 18
+    GET_FIFO_BUFFER = 18
 
     #RESET_REASON definition from PIC32 config
     RESET_REASON_NONE = 0x00000000
@@ -334,14 +334,14 @@ class Fuelsensor_interface(object):
         res = self.send_cmd(GET_SDFT_ECHO, params, length+4)
         return res        
 
-    def get_sdft_histo(self, offset, length):
-        """ Returns sdft histogram """
+    def get_fifo_buffer(self, offset, length):
+        """ Returns sdft array of last measured positions """
         params = bytearray()
         params += struct.pack('>H', offset)
         params += struct.pack('>H', length)
         for i in range(4):
             params.append(0)
-        res = self.send_cmd(GET_SDFT_HISTO, params, length+4)
+        res = self.send_cmd(GET_FIFO_BUFFER, params, length+4)
         return res   
 
     def get_complete_norm_echo(self, length,packet_size):
@@ -380,14 +380,14 @@ class Fuelsensor_interface(object):
             print len(data), "/", length,"\r",
         return data  
 
-    def get_complete_sdft_histo(self, length, packet_size):
+    def get_complete_fifo_buffer(self, length, packet_size):
         """get sdft histo"""
         truncated_len =  int(length / packet_size) + 1
         data = bytearray()
         for i in range (1,truncated_len):
             while(True):
                 try:
-                        partial_data = self.get_sdft_histo((i-1)*packet_size,packet_size)
+                        partial_data = self.get_fifo_buffer((i-1)*packet_size,packet_size)
                 except Exception as e:
                         print "sdft_histo: ",e
                         partial_data = bytearray(0)

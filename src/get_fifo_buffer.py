@@ -6,9 +6,9 @@ import struct
 import pickle
 
 #Default parameters
-ip = '192.168.148.1'
+ip = '192.168.100.1'
 port = 5000
-length = 10000
+length = 1200
 packet_size = 50
 data_file = 'data'
 
@@ -22,8 +22,8 @@ fs.connect()
 print "backup_timeseries"
 fs.bk_timeseries()
 time.sleep(1)
-print "get_complete_sdft_histo"
-data = fs.get_complete_sdft_histo(length,packet_size)
+print "get_complete_fifo_buffer"
+data = fs.get_complete_fifo_buffer(length,packet_size)
 fs.close_socket()
 
 data_norm = []
