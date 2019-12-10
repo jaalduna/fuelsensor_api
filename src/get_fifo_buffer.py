@@ -8,7 +8,7 @@ import pickle
 #Default parameters
 ip = '192.168.100.1'
 port = 5000
-length = 1200
+length = 200
 packet_size = 50
 data_file = 'data'
 
@@ -39,10 +39,11 @@ for i in range(0,length/2):
 #for i in range(1,len(data_norm)):
 #    print data_norm[i]
 
-plt.plot(data_norm)
+plt.plot(data_norm,'.')
 plt.grid(True)
-plt.title('sdft histo')
-plt.ylabel('Counts')
+plt.title('FIFO buffer entries')
+plt.ylabel('pos')
+plt.axis([0,100,0,40000])
 plt.show()
 
 
