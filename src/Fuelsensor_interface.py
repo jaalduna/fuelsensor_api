@@ -3,6 +3,7 @@ import crcmod
 import socket
 import time
 import MySQLdb
+import pyodbc
 
 #import matplotlib.pyplot as plt
 #AN1388 Microchip bootloader implementation
@@ -170,7 +171,83 @@ class Fuelsensor_interface(object):
     #def __del__(self):
     #    self.socket.close()
 
-    def create_table(self, table='estanque_1', db='fs_data', host='localhost', verbose=True, drop_table=False):
+    def sql_server_insert_develop(self, height, table='caex48', db='develop', verbose=True):
+        conn = pyodbc.connect('Driver={SQL Server};'
+                              'Server=WIN-KA4LQK6DGPJ\SQLEXPRESS;'
+                              'Database=develop;'
+                              'Trusted_Connection=yes;')
+        vol = height/0.0225
+        if conn:
+            cursor = conn.cursor()
+
+            now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            if verbose:
+                print 'Inserting new entry {0} into table {1}...'.format(height,table),
+            query = 'insert into {0} (fecha,altura,volumen) values (\'{1}\',{2},{3})'.format(table, now, height,vol)
+            cursor.execute(query)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            if verbose:
+                print 'Done.'
+
+
+    def sql_server_insert(self, date, height, percent, verbose=True):
+        conn = pyodbc.connect('Driver={SQL Server};'
+                              'Server=WIN-KA4LQK6DGPJ\SQLEXPRESS;'
+                              'Trusted_Connection=yes;')
+        if conn:
+            cursor = conn.cursor()
+
+            now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            vol = 5506*percent/100.0
+            if verbose:
+                print 'Inserting new entry {0} into table {1}...'.format(height,'estanque_lecturas'),
+            query = "insert into [aiko_desarrollo].[dbo].[estanque_lecturas] (estanque_id,altura_raw,altura_normalizada,volumen_normalizado,fecha_hora_lectura_sensor,fecha_hora_recepcion,fecha_hora_procesado,created_at,updated_at,volumen_raw) values (1,{0},{0},{2},'{3}','{1}','{1}','{1}','{1}',{2})".format(height,now,vol,date)
+            cursor.execute(query)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            if verbose:
+                print 'Done.'
+
+    def sql_server_update_estanques(self, id, date, percent,verbose=True):
+        conn = pyodbc.connect('Driver={SQL Server};'
+                              'Server=WIN-KA4LQK6DGPJ\SQLEXPRESS;'
+                              'Trusted_Connection=yes;')
+        if conn:
+            cursor = conn.cursor()
+
+            now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            vol = 5506*percent/100.0
+            if verbose:
+                print 'Updating table estanque_lecturas'
+            query = "update [aiko_desarrollo].[dbo].[estanques] set fecha_hora_lectura = '{0}', volumen_medido = {1}, porcentaje_medido = {2}, updated_at = CURRENT_TIMESTAMP where equipo_id = {3}".format(date,vol,percent,id)
+            cursor.execute(query)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            if verbose:
+                print 'Done.'
+
+
+    def sql_copy_table(self):
+        conn = pyodbc.connect('Driver={SQL Server};'
+                              'Server=WIN-KA4LQK6DGPJ\SQLEXPRESS;'
+                              'Trusted_Connection=yes;')
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("select fecha, altura from [develop].[dbo].[caex48]")
+            table = cursor.fetchall()
+            for row in table:
+                query = "insert into [aiko_desarrollo].[dbo].[estanque_lecturas] (estanque_id,altura_raw,altura_normalizada,fecha_hora_lectura_sensor,fecha_hora_recepcion,fecha_hora_procesado,created_at,updated_at) values (1,{0},{0},'{1}','{1}','{1}','{1}','{1}')".format(row[1],row[0])
+                cursor.execute(query)
+                print row
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+    def mysql_create_table(self, table='estanque_1', db='fs_data', host='localhost', verbose=True, drop_table=False):
         if verbose:
             print "Initializing database '{0}' at {2}...".format(db,host)
         conn = MySQLdb.connect(host=host, user='aiko', passwd='aiko')
@@ -194,7 +271,7 @@ class Fuelsensor_interface(object):
             if verbose:
                 print 'Done.'
 
-    def insert_row(self, height, table='estanque_1', db='fs_data', host='localhost', verbose=True):
+    def mysql_insert_row(self, height, table='estanque_1', db='fs_data', host='localhost', verbose=True):
         conn = MySQLdb.connect(host=host, user='aiko', passwd='aiko', db=db)
         if conn:
             cursor = conn.cursor()
@@ -209,7 +286,7 @@ class Fuelsensor_interface(object):
             if verbose:
                 print 'Done.'
 
-    def delete_row(self,id,table='estanque_1',db='fs_data',host='localhost',verbose=True):
+    def mysql_delete_row(self,id,table='estanque_1',db='fs_data',host='localhost',verbose=True):
         conn = MySQLdb.connect(host=host,user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()
@@ -222,7 +299,7 @@ class Fuelsensor_interface(object):
             if verbose:
                 print 'Done.'
 
-    def fetch_table(self,table='estanque_1',db='fs_data',host='localhost'):
+    def mysql_fetch_table(self,table='estanque_1',db='fs_data',host='localhost'):
         conn = MySQLdb.connect(host=host,user='aiko',passwd='aiko',db=db)
         if conn:
             cursor = conn.cursor()

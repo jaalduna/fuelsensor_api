@@ -3,7 +3,7 @@ import time
 from Fuelsensor_interface import Fuelsensor_interface
 
 fs = Fuelsensor_interface('192.168.148.1',5000)
-#fs.create_table()
+fs.create_table()
 
 while True:
     try:
