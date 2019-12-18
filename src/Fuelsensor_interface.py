@@ -47,6 +47,7 @@ class Param(object):
         self.value = 0
         self.interface = interface
         self.name = name
+
     def get_value(self,verbose=True):
         if(self.num_bytes == 1):
             self.value = self.interface.get_param_byte(self.param_id)
@@ -108,8 +109,8 @@ class Params(object):
         self.sdft_k = Param(interface, self.PARAM_SDFT_K,2,'SDFT K')
         self.sdft_n = Param(interface, self.PARAM_SDFT_N,2,'SDFT N')
         self.sdft_i_min = Param(interface,self.PARAM_SDFT_I_MIN,2,'SDFT Dead band')
-        self.sdft_min_eco_limit = Param(interface, self.PARAM_SDFT_MIN_ECO_LIMIT,1,'SDFT Min eco limit')
-        self.sdft_max_eco_limit = Param(interface, self.PARAM_SDFT_MAX_ECO_LIMIT,1,'SDFT Max eco limit')
+        self.sdft_min_eco_limit = Param(interface, self.PARAM_SDFT_MIN_ECO_LIMIT,2,'SDFT Min eco limit')
+        self.sdft_max_eco_limit = Param(interface, self.PARAM_SDFT_MAX_ECO_LIMIT,2,'SDFT Max eco limit')
         self.sdft_var_norm = Param(interface, self.PARAM_SDFT_VAR_NORM,4,'SDFT Var norm')
         self.sdft_peak = Param(interface, self.PARAM_SDFT_PEAK,4,'SDFT Upper threshold')
         self.sdft_sound_speed = Param(interface, self.PARAM_SDFT_SOUND_SPEED,2,'SDFT Sound speed')
@@ -629,7 +630,7 @@ class Fuelsensor_interface(object):
             try:
                 if(verbose):
                     print "sending: ",
-                    #self.print_modbus(str(packet))
+                    self.print_modbus(str(packet))
                 start_time = (time.time()*1000)
                 #self.print_modbus(str(packet))
 
@@ -653,9 +654,9 @@ class Fuelsensor_interface(object):
                         if(connect):
                             self.close_socket()
                         if(verbose):
-                            print "time elapsed: ",
-                            print str(stop_time - start_time)
-                            print "data received ok: ",
+                            #print "time elapsed: ",
+                            #print str(stop_time - start_time)
+                            print "received: ",
                             if(verbose):
                                 self.print_modbus(data)
 
@@ -697,7 +698,7 @@ class Fuelsensor_interface(object):
         param_field = struct.pack('>BBBBBBBB', param_id,0,0,0,0,0,0,0)
         param_value_bytearray = self.send_cmd(GET_PARAM, param_field, num_bytes_response +4) #+4 is for header size 
         #check number of bytes returned, it seems that answer is always 4 bytes ??
-
+        #self.print_modbus(param_value_bytearray)
         #complete for other param_id values, struct.unpack format should be
         # ''
         return param_value_bytearray
@@ -731,6 +732,7 @@ class Fuelsensor_interface(object):
         value_field =  struct.pack('<HH',0,value)
         response = self.set_param(param_id, 4, value_field)    
         return response
+
     def set_param_float_32(self, param_id,value):
         value_field =  struct.pack('<f',value)
         response = self.set_param(param_id, 4, value_field)  

@@ -20,12 +20,12 @@ try:
 	#params.data_vector_type.set_value(0)
 	#params.data_vector_offset.set_value(0)
 
-    params.sdft_peak.set_value(5)
+    params.sdft_peak.set_value(2)
     params.sdft_min_peak_value_th.set_value(1)
     #params.sdft_n.set_value(107)
     #params.sdft_i_min.set_value(500)
     #params.sdft_min_eco_limit.set_value(25)
-    #params.sdft_max_eco_limit.set_value(75)
+    #params.sdft_max_eco_limit.set_value(50)
     #params.sdft_var_norm.set_value(500)
     
     #params.sdft_sound_speed.set_value(1660) #Ethylene Glycol
@@ -33,11 +33,13 @@ try:
     #params.sdft_n_samples_one_valid.set_value(20)
     #params.skip_param.set_value(20000)
 
+    #--------------------------------
     #calculate SDFT K parameter value
     params.sdft_n.get_value(verbose=False)
     params.pulse_period.get_value(verbose=False)
     k = int(round(100.0*params.sdft_n.value/params.pulse_period.value/2.5))       #K = N/(Pp*Fm)
-    params.sdft_k.set_value(k)   
+    #params.sdft_k.set_value(k)  
+    #---------------------------------
     
 except KeyboardInterrupt:
 	print "Keyboard Interrupt"
