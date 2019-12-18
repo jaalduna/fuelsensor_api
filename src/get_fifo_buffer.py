@@ -8,7 +8,7 @@ import pickle
 #Default parameters
 ip = '192.168.100.1'
 port = 5000
-length = 200
+length = 4800 # 2X fifo length because of the 2 bytes of short data type (length = bytes amount)
 packet_size = 50
 data_file = 'data'
 
@@ -43,7 +43,7 @@ plt.plot(data_norm,'.')
 plt.grid(True)
 plt.title('FIFO buffer entries')
 plt.ylabel('pos')
-plt.axis([0,100,0,40000])
+plt.axis([0,length/2,0,40000])
 plt.show()
 
 
