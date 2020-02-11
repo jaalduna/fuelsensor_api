@@ -3,4 +3,5 @@
 /src/aiko1.X.production.hex
 /src/data
 /src/noise_raw_data
-/.vs
+.*
+!.gitignore
